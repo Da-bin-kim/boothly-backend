@@ -9,3 +9,8 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
+
+logging:
+  level:
+    org.hibernate: info
+    org.hibernate.orm.jdbc.bind: trace
