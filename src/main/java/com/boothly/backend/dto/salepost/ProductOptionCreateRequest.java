@@ -12,5 +12,5 @@ public class ProductOptionCreateRequest {
     private int price;
     private Integer cost;
     private int stockQuantity;
-    private int maxQuantityPerOder;
+    private Integer maxQuantityPerOrder;
 }

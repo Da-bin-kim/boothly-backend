@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class SalePostCreateRequest {
@@ -18,4 +19,6 @@ public class SalePostCreateRequest {
     private String bankName;
     private String accountNumber;
     private String accountHolder;
+    private List<ProductOptionCreateRequest> productOptions;
+    private List<DeliveryMethodCreateRequest> deliveryMethods;
 }
