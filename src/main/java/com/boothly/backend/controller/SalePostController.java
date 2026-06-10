@@ -1,6 +1,7 @@
 package com.boothly.backend.controller;
 
 import com.boothly.backend.common.response.ApiResponse;
+import com.boothly.backend.dto.PageResponse;
 import com.boothly.backend.dto.salepost.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.SalePostListResponse;
 import com.boothly.backend.service.SalePostService;
@@ -33,7 +34,7 @@ public class SalePostController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SalePostListResponse>>> findAll(
+    public ResponseEntity<ApiResponse<PageResponse<SalePostListResponse>>> findAll(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -46,7 +47,7 @@ public class SalePostController {
 
         Page<SalePostListResponse> response = salePostService.findAll(keyword, pageable);
 
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.from(response)));
     }
 
 
