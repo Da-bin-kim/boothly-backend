@@ -7,12 +7,15 @@ import com.boothly.backend.domain.user.User;
 import com.boothly.backend.dto.salepost.DeliveryMethodCreateRequest;
 import com.boothly.backend.dto.salepost.ProductOptionCreateRequest;
 import com.boothly.backend.dto.salepost.SalePostCreateRequest;
+import com.boothly.backend.dto.salepost.SalePostListResponse;
 import com.boothly.backend.repository.DeliveryMethodRepository;
 import com.boothly.backend.repository.ProductOptionRepository;
 import com.boothly.backend.repository.SalePostRepository;
 import com.boothly.backend.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,13 @@ public class SalePostService {
     private final ProductOptionRepository productOptionRepository;
     private final DeliveryMethodRepository deliveryMethodRepository;
 
+    /**
+     * 판매글을 생성한다.
+     *
+     * @param sellerId 판매자 ID
+     * @param request 판매글 생성 요청 DTO
+     * @return 생성된 판매글 ID
+     */
     @Transactional
     public Long create(Long sellerId, SalePostCreateRequest request) {
         /* 유효성 검증 */
@@ -117,4 +127,13 @@ public class SalePostService {
         deliveryMethodRepository.saveAll(deliveryMethods);
     }
 
+
+    public Page<SalePostListResponse> findAll(
+            String keyword,
+            Pageable pageable
+    ){
+        return salePostRepository
+                .findByTitleContaining(keyword, pageable)
+                .map(SalePostListResponse::from);
+    }
 }
