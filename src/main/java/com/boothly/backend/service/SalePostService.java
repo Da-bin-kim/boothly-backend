@@ -1,5 +1,6 @@
 package com.boothly.backend.service;
 
+import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
 import com.boothly.backend.domain.salepost.SalePost;
@@ -133,7 +134,7 @@ public class SalePostService {
             Pageable pageable
     ){
         return salePostRepository
-                .findByTitleContaining(keyword, pageable)
+                .findBysaleStatusAndTitleContaining(SalePostStatus.OPEN, keyword, pageable)
                 .map(SalePostListResponse::from);
     }
 }
