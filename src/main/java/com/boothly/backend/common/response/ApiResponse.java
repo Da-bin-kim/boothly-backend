@@ -1,5 +1,6 @@
 package com.boothly.backend.common.response;
 
+import com.boothly.backend.common.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,5 +21,13 @@ public class ApiResponse<T> {
 
     public static ApiResponse<Void> fail(String code, String message) {
         return new ApiResponse<>(false, null, new ErrorResponse(code, message));
+    }
+
+    public static ApiResponse<Void> fail(ErrorCode errorCode) {
+        return fail(errorCode.getCode(), errorCode.getMessage());
+    }
+
+    public static ApiResponse<Void> fail(ErrorCode errorCode, String message) {
+        return fail(errorCode.getCode(), message);
     }
 }

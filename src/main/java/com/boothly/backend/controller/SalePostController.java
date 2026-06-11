@@ -3,6 +3,7 @@ package com.boothly.backend.controller;
 import com.boothly.backend.common.response.ApiResponse;
 import com.boothly.backend.dto.PageResponse;
 import com.boothly.backend.dto.salepost.SalePostCreateRequest;
+import com.boothly.backend.dto.salepost.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.SalePostListResponse;
 import com.boothly.backend.service.SalePostService;
 import lombok.RequiredArgsConstructor;
@@ -67,5 +68,12 @@ public class SalePostController {
             case "endingSoon" -> Sort.by(Sort.Direction.ASC, "endAt");
             default -> throw new IllegalArgumentException("지원하지 않는 정렬 옵션입니다.");
         };
+    }
+
+    @GetMapping("/{salePostId}")
+    public ResponseEntity<ApiResponse<SalePostDetailResponse>> findById(
+            @PathVariable Long salePostId
+    ){
+        return ResponseEntity.ok(ApiResponse.success(salePostService.findById(salePostId)));
     }
 }

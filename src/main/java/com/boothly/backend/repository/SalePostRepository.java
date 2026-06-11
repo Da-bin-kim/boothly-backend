@@ -11,4 +11,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SalePostRepository extends JpaRepository<SalePost, Long> {
     @EntityGraph(attributePaths = "user")
     Page<SalePost> findBysaleStatusAndTitleContaining(SalePostStatus status, String keyword, Pageable pageable);
+
 }

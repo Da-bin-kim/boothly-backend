@@ -1,14 +1,13 @@
 package com.boothly.backend.service;
 
+import com.boothly.backend.common.exception.InvalidSalePostStateException;
+import com.boothly.backend.common.exception.SalePostNotFoundException;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
 import com.boothly.backend.domain.salepost.SalePost;
 import com.boothly.backend.domain.user.User;
-import com.boothly.backend.dto.salepost.DeliveryMethodCreateRequest;
-import com.boothly.backend.dto.salepost.ProductOptionCreateRequest;
-import com.boothly.backend.dto.salepost.SalePostCreateRequest;
-import com.boothly.backend.dto.salepost.SalePostListResponse;
+import com.boothly.backend.dto.salepost.*;
 import com.boothly.backend.repository.DeliveryMethodRepository;
 import com.boothly.backend.repository.ProductOptionRepository;
 import com.boothly.backend.repository.SalePostRepository;
@@ -136,5 +135,22 @@ public class SalePostService {
         return salePostRepository
                 .findBysaleStatusAndTitleContaining(SalePostStatus.OPEN, keyword, pageable)
                 .map(SalePostListResponse::from);
+    }
+
+    public SalePostDetailResponse findById(Long salePostId) {
+        SalePost salePost = salePostRepository.findById(salePostId).orElseThrow(() ->
+                new SalePostNotFoundException(salePostId));
+
+        List<ProductOption> productOptions = productOptionRepository.findAllBySalePostIdOrderByDisplayOrder(salePostId);
+        if(productOptions.isEmpty()){
+            throw new InvalidSalePostStateException(salePostId, "등록된 상품 옵션이 없습니다.");
+        }
+
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePostIdOrderByIdDesc(salePostId);
+        if(deliveryMethods.isEmpty()){
+            throw new InvalidSalePostStateException(salePostId, "등록된 배송 옵션이 없습니다.");
+        }
+
+        return SalePostDetailResponse.from(salePost, productOptions, deliveryMethods);
     }
 }
