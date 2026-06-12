@@ -28,7 +28,7 @@ public class SalePostController {
             @RequestParam Long sellerId,
             @RequestBody SalePostCreateRequest request
     ) {
-        Long salePostId = salePostService.create(sellerId, request);
+        Long salePostId = salePostService.createSalePost(sellerId, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -47,7 +47,7 @@ public class SalePostController {
         Sort sortCondition = getSortCondition(sort);
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
-        Page<SalePostListResponse> response = salePostService.findAll(keyword, pageable);
+        Page<SalePostListResponse> response = salePostService.findOpenSalePosts(keyword, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(PageResponse.from(response)));
     }
@@ -75,7 +75,7 @@ public class SalePostController {
     public ResponseEntity<ApiResponse<SalePostDetailResponse>> getDetail(
             @PathVariable Long salePostId
     ){
-        return ResponseEntity.ok(ApiResponse.success(salePostService.findById(salePostId)));
+        return ResponseEntity.ok(ApiResponse.success(salePostService.findSalePostDetail(salePostId)));
     }
 
     @GetMapping("/seller/sale-posts")

@@ -38,7 +38,7 @@ public class SalePostService {
      * @return 생성된 판매글 ID
      */
     @Transactional
-    public Long create(Long sellerId, SalePostCreateRequest request) {
+    public Long createSalePost(Long sellerId, SalePostCreateRequest request) {
         /* 유효성 검증 */
         User seller = userRepository.findById(sellerId).orElseThrow(() ->
                 new EntityNotFoundException("사용자를 찾을 수 없습니다: " + sellerId));
@@ -128,7 +128,7 @@ public class SalePostService {
     }
 
 
-    public Page<SalePostListResponse> findAll(
+    public Page<SalePostListResponse> findOpenSalePosts(
             String keyword,
             Pageable pageable
     ){
@@ -137,7 +137,7 @@ public class SalePostService {
                 .map(SalePostListResponse::from);
     }
 
-    public SalePostDetailResponse findById(Long salePostId) {
+    public SalePostDetailResponse findSalePostDetail(Long salePostId) {
         SalePost salePost = salePostRepository.findById(salePostId).orElseThrow(() ->
                 new SalePostNotFoundException(salePostId));
 
