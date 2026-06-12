@@ -12,6 +12,11 @@ public enum ErrorCode {
             "INVALID_REQUEST",
             "잘못된 요청입니다."
     ),
+    USER_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "USER_NOT_FOUND",
+            "사용자를 찾을 수 없습니다."
+    ),
     SALE_POST_NOT_FOUND(
             HttpStatus.NOT_FOUND,
             "SALE_POST_NOT_FOUND",

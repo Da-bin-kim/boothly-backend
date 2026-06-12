@@ -2,6 +2,7 @@ package com.boothly.backend.service;
 
 import com.boothly.backend.common.exception.InvalidSalePostStateException;
 import com.boothly.backend.common.exception.SalePostNotFoundException;
+import com.boothly.backend.common.exception.UserNotFoundException;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
@@ -41,7 +42,7 @@ public class SalePostService {
     public Long createSalePost(Long sellerId, SalePostCreateRequest request) {
         /* 유효성 검증 */
         User seller = userRepository.findById(sellerId).orElseThrow(() ->
-                new EntityNotFoundException("사용자를 찾을 수 없습니다: " + sellerId));
+                new UserNotFoundException(sellerId));
         validateSalePeriod(request);
 
         /* DTO -> Entity */
