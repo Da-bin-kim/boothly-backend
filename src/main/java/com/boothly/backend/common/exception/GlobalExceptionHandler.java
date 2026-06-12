@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    @ExceptionHandler(SalePostNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleSalePostNotFound(
-            SalePostNotFoundException e
-    ) {
-        log.warn("판매글 조회 실패 : {}", e.getMessage());
-        ErrorCode errorCode = ErrorCode.SALE_POST_NOT_FOUND;
-
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        log.warn(
+                "비즈니스 예외 발생: code={}, message={}",
+                errorCode.getCode(),
+                e.getMessage()
+        );
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode));
     }
-
     @ExceptionHandler(InvalidSalePostStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidSalePostState(
             InvalidSalePostStateException e
@@ -32,7 +32,6 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode));
     }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(
             IllegalArgumentException e
@@ -43,4 +42,5 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode, e.getMessage()));
     }
+
 }

@@ -26,6 +26,26 @@ public enum ErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR,
             "INTERNAL_SERVER_ERROR",
             "서버 내부 오류가 발생했습니다."
+    ),
+    SALE_POST_NOT_OPEN(
+            HttpStatus.CONFLICT,
+            "SALE_POST_NOT_OPEN",
+            "현재 판매 중인 게시글이 아닙니다."
+    ),
+    INVALID_SALE_POST_OPTION(
+            HttpStatus.CONFLICT,
+            "INVALID_SALE_POST_OPTION",
+            "해당 판매글에서 선택할 수 없는 상품 옵션입니다."
+    ),
+    PRODUCT_OPTION_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "PRODUCT_OPTION_NOT_FOUND",
+            "판매 옵션을 찾을 수 없습니다."
+    ),
+    INSUFFICIENT_PRODUCT_OPTION_STOCK(
+            HttpStatus.CONFLICT,
+            "INSUFFICIENT_PRODUCT_OPTION_STOCK",
+            "선택한 상품 옵션의 재고가 부족합니다."
     );
 
     private final HttpStatus status;

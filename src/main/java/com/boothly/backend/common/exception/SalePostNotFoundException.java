@@ -1,7 +1,10 @@
 package com.boothly.backend.common.exception;
 
-public class SalePostNotFoundException extends RuntimeException{
+public class SalePostNotFoundException extends BusinessException{
     public SalePostNotFoundException(Long salePostId) {
-        super("salePostId:" + salePostId + ", 판매글을 찾을 수 없습니다.");
+        super(ErrorCode.SALE_POST_NOT_FOUND,
+                "판매글을 찾을 수 없습니다."
+                        + " salePostId=" + salePostId
+        );
     }
 }
