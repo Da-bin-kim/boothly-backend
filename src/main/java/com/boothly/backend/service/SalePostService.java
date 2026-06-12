@@ -153,4 +153,13 @@ public class SalePostService {
 
         return SalePostDetailResponse.from(salePost, productOptions, deliveryMethods);
     }
+
+    public Page<MySalePostResponse> findMySalePosts(
+            Long userId,
+            String keyword,
+            Pageable pageable
+    ) {
+        return salePostRepository.findByUser_IdAndTitleContaining(userId, keyword, pageable)
+                .map(MySalePostResponse::from);
+    }
 }

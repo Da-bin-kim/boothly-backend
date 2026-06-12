@@ -2,6 +2,7 @@ package com.boothly.backend.controller;
 
 import com.boothly.backend.common.response.ApiResponse;
 import com.boothly.backend.dto.PageResponse;
+import com.boothly.backend.dto.salepost.MySalePostResponse;
 import com.boothly.backend.dto.salepost.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.SalePostListResponse;
@@ -18,11 +19,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/sale-posts")
+@RequestMapping("/api/v1")
 public class SalePostController {
     private final SalePostService salePostService;
 
-    @PostMapping
+    @PostMapping("/sale-posts")
     public ResponseEntity<ApiResponse<Long>> create(
             @RequestParam Long sellerId,
             @RequestBody SalePostCreateRequest request
@@ -34,8 +35,8 @@ public class SalePostController {
                 .body(ApiResponse.success(salePostId));
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<SalePostListResponse>>> findAll(
+    @GetMapping("/sale-posts")
+    public ResponseEntity<ApiResponse<PageResponse<SalePostListResponse>>> getSalePosts(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -70,10 +71,27 @@ public class SalePostController {
         };
     }
 
-    @GetMapping("/{salePostId}")
-    public ResponseEntity<ApiResponse<SalePostDetailResponse>> findById(
+    @GetMapping("/sale-posts/{salePostId}")
+    public ResponseEntity<ApiResponse<SalePostDetailResponse>> getDetail(
             @PathVariable Long salePostId
     ){
         return ResponseEntity.ok(ApiResponse.success(salePostService.findById(salePostId)));
+    }
+
+    @GetMapping("/seller/sale-posts")
+    public ResponseEntity<ApiResponse<PageResponse<MySalePostResponse>>> getMySalePosts(
+            @RequestParam Long userId,
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "latest") String sort
+    ){
+        validatePageRequest(page, size);
+        Sort sortCondition = getSortCondition(sort);
+        Pageable pageable = PageRequest.of(page, size, sortCondition);
+
+        PageResponse<MySalePostResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
