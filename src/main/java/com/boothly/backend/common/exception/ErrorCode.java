@@ -51,6 +51,11 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "INSUFFICIENT_PRODUCT_OPTION_STOCK",
             "선택한 상품 옵션의 재고가 부족합니다."
+    ),
+    PRODUCT_OPTION_ALREADY_EXISTS(
+            HttpStatus.CONFLICT,
+            "PRODUCT_OPTION_ALREADY_EXISTS",
+            "중복된 상품 옵션이 존재합니다."
     );
 
     private final HttpStatus status;
