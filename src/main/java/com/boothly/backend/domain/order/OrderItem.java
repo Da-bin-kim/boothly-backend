@@ -3,12 +3,10 @@ package com.boothly.backend.domain.order;
 import com.boothly.backend.common.entity.BaseTimeEntity;
 import com.boothly.backend.domain.salepost.ProductOption;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity

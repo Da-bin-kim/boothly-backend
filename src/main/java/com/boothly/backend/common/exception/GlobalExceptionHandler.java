@@ -1,5 +1,6 @@
 package com.boothly.backend.common.exception;
 
+import com.boothly.backend.common.exception.salepost.InvalidSalePostStateException;
 import com.boothly.backend.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

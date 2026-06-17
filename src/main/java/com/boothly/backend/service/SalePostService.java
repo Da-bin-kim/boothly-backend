@@ -1,8 +1,8 @@
 package com.boothly.backend.service;
 
-import com.boothly.backend.common.exception.InvalidSalePostStateException;
-import com.boothly.backend.common.exception.SalePostNotFoundException;
-import com.boothly.backend.common.exception.UserNotFoundException;
+import com.boothly.backend.common.exception.salepost.InvalidSalePostStateException;
+import com.boothly.backend.common.exception.salepost.SalePostNotFoundException;
+import com.boothly.backend.common.exception.user.UserNotFoundException;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
@@ -13,7 +13,6 @@ import com.boothly.backend.repository.DeliveryMethodRepository;
 import com.boothly.backend.repository.ProductOptionRepository;
 import com.boothly.backend.repository.SalePostRepository;
 import com.boothly.backend.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

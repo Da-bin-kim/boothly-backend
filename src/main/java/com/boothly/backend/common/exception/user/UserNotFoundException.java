@@ -1,4 +1,7 @@
-package com.boothly.backend.common.exception;
+package com.boothly.backend.common.exception.user;
+
+import com.boothly.backend.common.exception.BusinessException;
+import com.boothly.backend.common.exception.ErrorCode;
 
 public class UserNotFoundException extends BusinessException {
     public UserNotFoundException(Long userId) {

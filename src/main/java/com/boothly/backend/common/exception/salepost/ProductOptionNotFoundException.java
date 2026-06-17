@@ -1,4 +1,7 @@
-package com.boothly.backend.common.exception;
+package com.boothly.backend.common.exception.salepost;
+
+import com.boothly.backend.common.exception.BusinessException;
+import com.boothly.backend.common.exception.ErrorCode;
 
 public class ProductOptionNotFoundException extends BusinessException {
     public ProductOptionNotFoundException(Long salePostId, Long productOptionId) {

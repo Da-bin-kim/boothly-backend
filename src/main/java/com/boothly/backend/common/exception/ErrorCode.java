@@ -53,10 +53,26 @@ public enum ErrorCode {
             "선택한 상품 옵션의 재고가 부족합니다."
     ),
     PRODUCT_OPTION_ALREADY_EXISTS(
-            HttpStatus.CONFLICT,
+            HttpStatus.BAD_REQUEST,
             "PRODUCT_OPTION_ALREADY_EXISTS",
             "중복된 상품 옵션이 존재합니다."
+    ),
+    MAX_ORDER_QUANTITY_EXCEEDED(
+            HttpStatus.BAD_REQUEST,
+            "MAX_ORDER_QUANTITY_EXCEEDED",
+            "최대 주문 가능 수량을 초과했습니다."
+    ),
+    DELIVERY_METHOD_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "DELIVERY_METHOD_NOT_FOUND",
+            "일치하는 배송 옵션을 찾을 수 없습니다."
+    ),
+    ORDER_NUMBER_DUPLICATED(
+            HttpStatus.CONFLICT,
+            "ORDER_NUMBER_DUPLICATED",
+            "주문번호가 중복 발생했습니다."
     );
+
 
     private final HttpStatus status;
     private final String code;
