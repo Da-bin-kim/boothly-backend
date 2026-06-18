@@ -128,11 +128,12 @@ public class OrderService {
     }
 
     private Order saveOrder(User buyer, SalePost salePost, DeliveryMethod deliveryMethod, OrderCreateRequest request, int itemsTotalPrice) {
-        Order.OrderBuilder orderBuilder = Order.builder()
+        Order order = Order.builder()
                 .buyer(buyer)
                 .salePost(salePost)
                 .payerName(request.getPayerName())
                 .orderStatus(OrderStatus.REQUESTED)
+                .orderNumber(generateUniqueOrderNumber())
                 .recipientName(request.getRecipientName())
                 .recipientPhone(request.getRecipientPhone())
                 .deliveryType(deliveryMethod.getDeliveryType())
@@ -143,22 +144,10 @@ public class OrderService {
                 .memo(request.getMemo())
                 .bankName(request.getBankName())
                 .accountNumber(request.getAccountNumber())
-                .accountHolder(request.getAccountHolder());
+                .accountHolder(request.getAccountHolder())
+                .build();
 
-        int maxAttempts = 3;
-        int attempt = 0;
-
-        while (attempt < maxAttempts) {
-            try{
-                String orderNumber = orderNumberGenerator.generate();
-                Order order = orderBuilder.orderNumber(orderNumber).build();
-                return orderRepository.save(order);
-            } catch (DataIntegrityViolationException e){
-                attempt++;
-                log.warn("주문번호가 중복 발생하여 재시도합니다. (시도 횟수: {})", attempt);
-            }
-        }
-        throw new OrderCreationException();
+        return orderRepository.save(order);
     }
 
     private List<OrderItem> saveOrderItems(
@@ -200,6 +189,21 @@ public class OrderService {
                     0
             );
         }
+    }
+
+    private String generateUniqueOrderNumber() {
+        int maxAttempts = 3;
+        int attempt = 0;
+
+        while (attempt < maxAttempts) {
+            String orderNumber = orderNumberGenerator.generate();
+            if (!orderRepository.existsByOrderNumber(orderNumber)) {
+                return orderNumber;
+            }
+            attempt++;
+            log.warn("주문번호가 중복 발생하여 재시도합니다. (시도 횟수: {})", attempt);
+        }
+        throw new OrderCreationException();
     }
 }
 
