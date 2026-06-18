@@ -95,14 +95,6 @@ public class OrderService {
             if (!matchedOption.isActive()) {
                 throw new InvalidSalePostOptionException(salePostId, matchedOption.getId());
             }
-
-            if (requestedItem.getQuantity() > matchedOption.getStockQuantity()) {
-                throw new InsufficientProductOptionStockException(
-                        matchedOption.getId(),
-                        requestedItem.getQuantity(),
-                        matchedOption.getStockQuantity()
-                );
-            }
             if (matchedOption.getMaxQuantityPerOrder() != null
                     && (requestedItem.getQuantity() > matchedOption.getMaxQuantityPerOrder())) {
                 throw  new ProductOptionQuantityLimitExceededException(
@@ -178,6 +170,13 @@ public class OrderService {
 
         for(OrderItemCreateRequest request : orderItemCreateRequests) {
             ProductOption productOption = productOptions.get(request.getProductOptionId());
+
+            decreaseStock(
+                    order.getSalePost().getId(),
+                    productOption.getId(),
+                    request.getQuantity()
+            );
+
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .productOption(productOption)
@@ -187,22 +186,20 @@ public class OrderService {
                     .quantity(request.getQuantity())
                     .build();
             orderItems.add(orderItem);
-
-            int updated = productOptionRepository.decreaseStock(
-                    order.getSalePost().getId(),
-                    productOption.getId(),
-                    request.getQuantity()
-            );
-            if(updated == 0){
-                throw new InsufficientProductOptionStockException(
-                        request.getProductOptionId(),
-                        request.getQuantity(),
-                        0
-                );
-            }
         }
 
         return orderItemRepository.saveAll(orderItems);
+    }
+
+    private void decreaseStock(Long salePostId, Long productOptionId, Integer quantity) {
+        int updated = productOptionRepository.decreaseStock(salePostId, productOptionId, quantity);
+        if(updated == 0){
+            throw new InsufficientProductOptionStockException(
+                    productOptionId,
+                    quantity,
+                    0
+            );
+        }
     }
 }
 
