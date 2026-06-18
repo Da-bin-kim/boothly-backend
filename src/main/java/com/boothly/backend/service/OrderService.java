@@ -15,10 +15,12 @@ import com.boothly.backend.domain.user.User;
 import com.boothly.backend.dto.order.OrderCreateRequest;
 import com.boothly.backend.dto.order.OrderCreateResponse;
 import com.boothly.backend.dto.order.OrderItemCreateRequest;
+import com.boothly.backend.dto.order.OrderListResponse;
 import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +57,15 @@ public class OrderService {
         List<OrderItem> orderItems = saveOrderItems(order, productOptions, request.getOrderItems());
 
         return OrderCreateResponse.from(order, orderItems);
+    }
+
+    public Page<OrderListResponse> findMyOrders(
+            Long userId,
+            String keyword,
+            Pageable pageable) {
+
+        return orderRepository.findByBuyer_IdAndSalePost_TitleContaining(userId, keyword, pageable)
+                .map(OrderListResponse::from);
     }
 
 

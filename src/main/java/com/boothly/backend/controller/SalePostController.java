@@ -1,6 +1,7 @@
 package com.boothly.backend.controller;
 
 import com.boothly.backend.common.response.ApiResponse;
+import com.boothly.backend.common.validation.PageRequestValidator;
 import com.boothly.backend.dto.PageResponse;
 import com.boothly.backend.dto.salepost.MySalePostResponse;
 import com.boothly.backend.dto.salepost.SalePostCreateRequest;
@@ -43,9 +44,9 @@ public class SalePostController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "latest") String sort
     ){
-        validatePageRequest(page, size);
+        PageRequestValidator.validate(page, size);
 
-        Sort sortCondition = getSortCondition(sort);
+        Sort sortCondition = getSalePostSortCondition(sort);
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
         Page<SalePostListResponse> response = salePostService.findOpenSalePosts(keyword, pageable);
@@ -53,18 +54,7 @@ public class SalePostController {
         return ResponseEntity.ok(ApiResponse.success(PageResponse.from(response)));
     }
 
-
-    private void validatePageRequest(int page, int size) {
-        if (page < 0) {
-            throw new IllegalArgumentException("page는 0 이상이어야 합니다.");
-        }
-
-        if (size < 1 || size > 50) {
-            throw new IllegalArgumentException("size는 1 이상 50 이하이어야 합니다.");
-        }
-    }
-
-    private Sort getSortCondition(String sort) {
+    private Sort getSalePostSortCondition(String sort) {
         return switch (sort) {
             case "latest" -> Sort.by(Sort.Direction.DESC, "createdAt");
             case "endingSoon" -> Sort.by(Sort.Direction.ASC, "endAt");
@@ -87,8 +77,8 @@ public class SalePostController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "latest") String sort
     ){
-        validatePageRequest(page, size);
-        Sort sortCondition = getSortCondition(sort);
+        PageRequestValidator.validate(page, size);
+        Sort sortCondition = getSalePostSortCondition(sort);
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
         PageResponse<MySalePostResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
