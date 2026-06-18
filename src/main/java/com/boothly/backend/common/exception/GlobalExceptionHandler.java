@@ -4,6 +4,8 @@ import com.boothly.backend.common.exception.salepost.InvalidSalePostStateExcepti
 import com.boothly.backend.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -43,5 +45,20 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode, e.getMessage()));
     }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException e
+    ){
+        ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+        String message = errorCode.getMessage();
 
+        if (!e.getBindingResult().getFieldErrors().isEmpty()) {
+            FieldError fieldError = e.getBindingResult().getFieldErrors().get(0);
+            message = fieldError.getField() + ": " + fieldError.getDefaultMessage();
+        }
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.fail(errorCode, message));
+    }
 }

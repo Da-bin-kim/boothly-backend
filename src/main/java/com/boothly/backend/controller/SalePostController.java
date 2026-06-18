@@ -7,6 +7,7 @@ import com.boothly.backend.dto.salepost.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.SalePostListResponse;
 import com.boothly.backend.service.SalePostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,7 @@ public class SalePostController {
     @PostMapping("/sale-posts")
     public ResponseEntity<ApiResponse<Long>> create(
             @RequestParam Long sellerId,
-            @RequestBody SalePostCreateRequest request
+            @Valid @RequestBody SalePostCreateRequest request
     ) {
         Long salePostId = salePostService.createSalePost(sellerId, request);
 

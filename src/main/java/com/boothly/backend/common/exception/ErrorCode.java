@@ -71,6 +71,11 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "ORDER_NUMBER_DUPLICATED",
             "주문번호가 중복 발생했습니다."
+    ),
+    VALIDATION_FAILED(
+            HttpStatus.BAD_REQUEST,
+            "VALIDATION_FAILED",
+            "요청 값이 올바르지 않습니다."
     );
 
 
