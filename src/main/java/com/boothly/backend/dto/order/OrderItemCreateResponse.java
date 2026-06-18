@@ -19,7 +19,7 @@ public class OrderItemCreateResponse {
         return OrderItemCreateResponse.builder()
                 .id(orderItem.getId())
                 .productOptionId(orderItem.getProductOption().getId())
-                .productOptionName(orderItem.getProductOption().getName())
+                .productOptionName(orderItem.getProductOptionName())
                 .unitPrice(orderItem.getUnitPrice())
                 .quantity(orderItem.getQuantity())
                 .build();
