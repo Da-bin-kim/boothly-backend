@@ -1,8 +1,11 @@
-package com.boothly.backend.dto.order;
+package com.boothly.backend.dto.order.create;
 
 import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.domain.order.Order;
 import com.boothly.backend.domain.order.OrderItem;
+import com.boothly.backend.dto.order.common.FulfillmentInfoResponse;
+import com.boothly.backend.dto.order.common.PaymentInfoResponse;
+import com.boothly.backend.dto.order.common.PriceInfoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

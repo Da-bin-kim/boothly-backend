@@ -1,6 +1,7 @@
 package com.boothly.backend.service;
 
 import com.boothly.backend.common.exception.order.OrderCreationException;
+import com.boothly.backend.common.exception.order.OrderNotFoundException;
 import com.boothly.backend.common.exception.salepost.*;
 import com.boothly.backend.common.exception.user.UserNotFoundException;
 import com.boothly.backend.common.generator.OrderNumberGenerator;
@@ -12,10 +13,11 @@ import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
 import com.boothly.backend.domain.salepost.SalePost;
 import com.boothly.backend.domain.user.User;
-import com.boothly.backend.dto.order.OrderCreateRequest;
-import com.boothly.backend.dto.order.OrderCreateResponse;
-import com.boothly.backend.dto.order.OrderItemCreateRequest;
-import com.boothly.backend.dto.order.OrderListResponse;
+import com.boothly.backend.dto.order.create.OrderCreateRequest;
+import com.boothly.backend.dto.order.create.OrderCreateResponse;
+import com.boothly.backend.dto.order.create.OrderItemCreateRequest;
+import com.boothly.backend.dto.order.detail.OrderDetailResponse;
+import com.boothly.backend.dto.order.list.OrderListResponse;
 import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +68,13 @@ public class OrderService {
 
         return orderRepository.findByBuyer_IdAndSalePost_TitleContaining(userId, keyword, pageable)
                 .map(OrderListResponse::from);
+    }
+
+    public OrderDetailResponse findOrderDetail(Long userId, Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(()->
+                new OrderNotFoundException(userId, orderId));
+
+        return  null;
     }
 
 

@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.order;
+package com.boothly.backend.dto.order.create;
 
 import com.boothly.backend.domain.order.OrderItem;
 import lombok.AllArgsConstructor;

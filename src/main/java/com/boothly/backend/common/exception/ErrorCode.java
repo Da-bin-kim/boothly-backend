@@ -76,6 +76,11 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST,
             "VALIDATION_FAILED",
             "요청 값이 올바르지 않습니다."
+    ),
+    ORDER_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "ORDER_NOT_FOUND",
+            "주문 정보를 찾을 수 없습니다."
     );
 
 

@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.order;
+package com.boothly.backend.dto.order.common;
 
 import com.boothly.backend.domain.enums.DeliveryType;
 import com.boothly.backend.domain.order.Order;

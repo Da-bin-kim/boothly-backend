@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.order;
+package com.boothly.backend.dto.order.create;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;

@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.order;
+package com.boothly.backend.dto.order.list;
 
 import com.boothly.backend.domain.salepost.SalePost;
 import lombok.AllArgsConstructor;
