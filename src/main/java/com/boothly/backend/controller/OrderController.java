@@ -5,6 +5,7 @@ import com.boothly.backend.common.validation.PageRequestValidator;
 import com.boothly.backend.dto.PageResponse;
 import com.boothly.backend.dto.order.create.OrderCreateRequest;
 import com.boothly.backend.dto.order.create.OrderCreateResponse;
+import com.boothly.backend.dto.order.detail.OrderDetailResponse;
 import com.boothly.backend.dto.order.list.OrderListResponse;
 import com.boothly.backend.service.OrderService;
 import jakarta.validation.Valid;
@@ -49,6 +50,15 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page, size, sortCondition);
         PageResponse<OrderListResponse> response =
                 PageResponse.from(orderService.findMyOrders(userId, keyword, pageable));
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrderDetail(
+            @RequestParam Long userId,
+            @PathVariable Long orderId
+    ){
+        OrderDetailResponse response = orderService.findOrderDetail(orderId, userId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

@@ -70,11 +70,13 @@ public class OrderService {
                 .map(OrderListResponse::from);
     }
 
-    public OrderDetailResponse findOrderDetail(Long userId, Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(()->
+    public OrderDetailResponse findOrderDetail(Long orderId, Long userId) {
+        Order order = orderRepository.findByIdAndBuyer_Id(orderId, userId).orElseThrow(() ->
                 new OrderNotFoundException(userId, orderId));
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_id(orderId);
+        //TODO: 비어있을 경우 exception
 
-        return  null;
+        return  OrderDetailResponse.from(order, orderItems);
     }
 
 
