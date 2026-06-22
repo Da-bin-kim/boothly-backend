@@ -81,7 +81,13 @@ public enum ErrorCode {
             HttpStatus.NOT_FOUND,
             "ORDER_NOT_FOUND",
             "주문 정보를 찾을 수 없습니다."
-    );
+    ),
+    ORDER_ITEM_MISSING_FOR_ORDER(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "ORDER_ITEM_MISSING_FOR_ORDER",
+            "주문 옵션 정보가 누락되었습니다."
+    )
+    ;
 
 
     private final HttpStatus status;

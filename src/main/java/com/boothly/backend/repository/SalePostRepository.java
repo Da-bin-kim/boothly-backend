@@ -13,4 +13,6 @@ public interface SalePostRepository extends JpaRepository<SalePost, Long> {
     Page<SalePost> findBysaleStatusAndTitleContaining(SalePostStatus status, String keyword, Pageable pageable);
 
     Page<SalePost> findByUser_IdAndTitleContaining(Long userId, String keyword, Pageable pageable);
+
+    boolean existsByIdAndUser_Id(Long salePostId, Long userId);
 }

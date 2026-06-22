@@ -1,6 +1,7 @@
 package com.boothly.backend.service;
 
 import com.boothly.backend.common.exception.order.OrderCreationException;
+import com.boothly.backend.common.exception.order.OrderItemMissingForOrderException;
 import com.boothly.backend.common.exception.order.OrderNotFoundException;
 import com.boothly.backend.common.exception.salepost.*;
 import com.boothly.backend.common.exception.user.UserNotFoundException;
@@ -18,6 +19,7 @@ import com.boothly.backend.dto.order.create.OrderCreateResponse;
 import com.boothly.backend.dto.order.create.OrderItemCreateRequest;
 import com.boothly.backend.dto.order.detail.OrderDetailResponse;
 import com.boothly.backend.dto.order.list.OrderListResponse;
+import com.boothly.backend.dto.order.list.SellerSalePostOrderResponse;
 import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -73,10 +72,31 @@ public class OrderService {
     public OrderDetailResponse findOrderDetail(Long orderId, Long userId) {
         Order order = orderRepository.findByIdAndBuyer_Id(orderId, userId).orElseThrow(() ->
                 new OrderNotFoundException(userId, orderId));
-        List<OrderItem> orderItems = orderItemRepository.findByOrder_id(orderId);
-        //TODO: 비어있을 경우 exception
+        List<OrderItem> orderItems = validateAndGetOrderItems(orderId);
 
         return  OrderDetailResponse.from(order, orderItems);
+    }
+
+    public Page<SellerSalePostOrderResponse> findSellerSalePostOrders(Long userId, Long salePostId, Pageable pageable) {
+        validateSalePostOwner(userId, salePostId);
+
+        Page<Order> orders = orderRepository.findBySalePost_Id(salePostId,pageable);
+
+        Map<Long, List<OrderItem>> orderItems = orders.hasContent()
+                ? validateAndGetOrderItemsByOrderId(orders.getContent())
+                : Collections.emptyMap();
+
+        return orders.map(order -> {
+            Long orderId = order.getId();
+
+            List<OrderItem> items = orderItems.get(orderId);
+
+            if(items.isEmpty()){
+                throw new OrderItemMissingForOrderException(orderId);
+            }
+
+            return SellerSalePostOrderResponse.from(order, items);
+        });
     }
 
 
@@ -227,5 +247,49 @@ public class OrderService {
         }
         throw new OrderCreationException();
     }
+
+    private void validateSalePostOwner(Long userId, Long salePostId) {
+        if (!salePostRepository.existsByIdAndUser_Id(salePostId, userId)) {
+            throw new SalePostNotFoundException(salePostId);
+        }
+    }
+
+    private List<OrderItem> validateAndGetOrderItems(Long orderId) {
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_id(orderId);
+
+        if (orderItems.isEmpty()) {
+            throw new OrderItemMissingForOrderException(orderId);
+        }
+
+        return orderItems;
+    }
+
+    private Map<Long, List<OrderItem>> validateAndGetOrderItemsByOrderId(List<Order> orders) {
+        if (orders.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Long> orderIds = orders.stream()
+                .map(Order::getId)
+                .toList();
+
+        List<OrderItem> orderItems =
+                orderItemRepository.findByOrder_idIn(orderIds);
+
+        Map<Long, List<OrderItem>> matchedOrderItemMap =
+                orderItems.stream()
+                .collect(Collectors.groupingBy(orderItem -> orderItem.getOrder().getId()));
+
+        orders.forEach(order -> {
+            Long orderId = order.getId();
+
+            if (!matchedOrderItemMap.containsKey(orderId)) {
+                throw new OrderItemMissingForOrderException(orderId);
+            }
+        });
+
+        return matchedOrderItemMap;
+    }
+
 }
 

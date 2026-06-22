@@ -7,6 +7,7 @@ import com.boothly.backend.dto.order.create.OrderCreateRequest;
 import com.boothly.backend.dto.order.create.OrderCreateResponse;
 import com.boothly.backend.dto.order.detail.OrderDetailResponse;
 import com.boothly.backend.dto.order.list.OrderListResponse;
+import com.boothly.backend.dto.order.list.SellerSalePostOrderResponse;
 import com.boothly.backend.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,30 @@ public class OrderController {
             @PathVariable Long orderId
     ){
         OrderDetailResponse response = orderService.findOrderDetail(orderId, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/seller/sale-posts/{salePostId}/orders")
+    public ResponseEntity<ApiResponse<PageResponse<SellerSalePostOrderResponse>>> getSellerSalePostOrders(
+            @RequestParam Long userId,
+            @PathVariable Long salePostId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "latest") String sort
+    ) {
+        PageRequestValidator.validate(page, size);
+
+        Sort sortCondition = switch (sort) {
+            case "latest" -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt");
+            default -> throw new IllegalArgumentException("지원하지 않는 정렬 옵션입니다.");
+        };
+
+        Pageable pageable = PageRequest.of(page, size, sortCondition);
+
+        PageResponse<SellerSalePostOrderResponse> response =
+                PageResponse.from(orderService.findSellerSalePostOrders(userId, salePostId, pageable));
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
