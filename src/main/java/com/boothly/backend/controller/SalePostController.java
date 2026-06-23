@@ -3,6 +3,7 @@ package com.boothly.backend.controller;
 import com.boothly.backend.common.response.ApiResponse;
 import com.boothly.backend.common.validation.PageRequestValidator;
 import com.boothly.backend.dto.PageResponse;
+import com.boothly.backend.dto.salepost.SalePostCloseResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostListResponse;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
@@ -84,5 +85,15 @@ public class SalePostController {
         PageResponse<MySalePostListResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/seller/sale-posts/{salePostId}/close")
+    public ResponseEntity<ApiResponse<SalePostCloseResponse>> closeSalePost(
+            @RequestParam Long sellerId,
+            @PathVariable Long salePostId
+    ){
+        return ResponseEntity.ok(ApiResponse.success(
+                salePostService.closeSalePost(sellerId, salePostId))
+        );
     }
 }

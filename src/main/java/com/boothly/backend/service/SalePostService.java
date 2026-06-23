@@ -8,6 +8,7 @@ import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
 import com.boothly.backend.domain.salepost.SalePost;
 import com.boothly.backend.domain.user.User;
+import com.boothly.backend.dto.salepost.SalePostCloseResponse;
 import com.boothly.backend.dto.salepost.create.DeliveryMethodCreateRequest;
 import com.boothly.backend.dto.salepost.create.ProductOptionCreateRequest;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
@@ -166,5 +167,14 @@ public class SalePostService {
     ) {
         return salePostRepository.findByUser_IdAndTitleContaining(userId, keyword, pageable)
                 .map(MySalePostListResponse::from);
+    }
+
+    @Transactional
+    public SalePostCloseResponse closeSalePost(Long sellerId, Long salePostId) {
+        SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
+                .orElseThrow(() -> new SalePostNotFoundException(salePostId));
+        salePost.close();
+
+        return SalePostCloseResponse.from(salePost);
     }
 }

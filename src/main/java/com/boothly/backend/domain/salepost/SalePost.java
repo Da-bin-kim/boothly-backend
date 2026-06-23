@@ -52,4 +52,13 @@ public class SalePost extends BaseTimeEntity {
 
     @Column(nullable = false, length = 50)
     private String accountHolder;
+
+    public void close() {
+        if (this.saleStatus == SalePostStatus.CLOSED) {
+            return;
+        }
+
+        this.saleStatus = SalePostStatus.CLOSED;
+        this.endAt = LocalDateTime.now();
+    }
 }
