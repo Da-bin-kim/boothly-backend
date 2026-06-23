@@ -8,7 +8,12 @@ import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
 import com.boothly.backend.domain.salepost.SalePost;
 import com.boothly.backend.domain.user.User;
-import com.boothly.backend.dto.salepost.*;
+import com.boothly.backend.dto.salepost.create.DeliveryMethodCreateRequest;
+import com.boothly.backend.dto.salepost.create.ProductOptionCreateRequest;
+import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
+import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
+import com.boothly.backend.dto.salepost.list.MySalePostListResponse;
+import com.boothly.backend.dto.salepost.list.SalePostListResponse;
 import com.boothly.backend.repository.DeliveryMethodRepository;
 import com.boothly.backend.repository.ProductOptionRepository;
 import com.boothly.backend.repository.SalePostRepository;
@@ -154,12 +159,12 @@ public class SalePostService {
         return SalePostDetailResponse.from(salePost, productOptions, deliveryMethods);
     }
 
-    public Page<MySalePostResponse> findMySalePosts(
+    public Page<MySalePostListResponse> findMySalePosts(
             Long userId,
             String keyword,
             Pageable pageable
     ) {
         return salePostRepository.findByUser_IdAndTitleContaining(userId, keyword, pageable)
-                .map(MySalePostResponse::from);
+                .map(MySalePostListResponse::from);
     }
 }

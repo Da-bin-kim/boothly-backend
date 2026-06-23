@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.salepost;
+package com.boothly.backend.dto.salepost.create;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

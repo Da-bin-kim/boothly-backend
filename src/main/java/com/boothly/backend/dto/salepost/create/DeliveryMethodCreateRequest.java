@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.salepost;
+package com.boothly.backend.dto.salepost.create;
 
 import com.boothly.backend.domain.enums.DeliveryType;
 import jakarta.validation.constraints.NotBlank;

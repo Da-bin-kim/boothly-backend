@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.salepost;
+package com.boothly.backend.dto.salepost.list;
 
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.salepost.SalePost;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class MySalePostResponse {
+public class MySalePostListResponse {
     private Long salePostId;
     private String title;
     private SalePostStatus saleStatus;
@@ -18,8 +18,8 @@ public class MySalePostResponse {
     private LocalDateTime endAt;
     private LocalDateTime createdAt;
 
-    public static MySalePostResponse from(SalePost salePost) {
-        return MySalePostResponse.builder()
+    public static MySalePostListResponse from(SalePost salePost) {
+        return MySalePostListResponse.builder()
                 .salePostId(salePost.getId())
                 .title(salePost.getTitle())
                 .saleStatus(salePost.getSaleStatus())

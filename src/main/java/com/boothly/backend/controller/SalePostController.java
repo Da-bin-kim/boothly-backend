@@ -3,10 +3,10 @@ package com.boothly.backend.controller;
 import com.boothly.backend.common.response.ApiResponse;
 import com.boothly.backend.common.validation.PageRequestValidator;
 import com.boothly.backend.dto.PageResponse;
-import com.boothly.backend.dto.salepost.MySalePostResponse;
-import com.boothly.backend.dto.salepost.SalePostCreateRequest;
-import com.boothly.backend.dto.salepost.SalePostDetailResponse;
-import com.boothly.backend.dto.salepost.SalePostListResponse;
+import com.boothly.backend.dto.salepost.list.MySalePostListResponse;
+import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
+import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
+import com.boothly.backend.dto.salepost.list.SalePostListResponse;
 import com.boothly.backend.service.SalePostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +70,7 @@ public class SalePostController {
     }
 
     @GetMapping("/seller/sale-posts")
-    public ResponseEntity<ApiResponse<PageResponse<MySalePostResponse>>> getMySalePosts(
+    public ResponseEntity<ApiResponse<PageResponse<MySalePostListResponse>>> getMySalePosts(
             @RequestParam Long userId,
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -81,7 +81,7 @@ public class SalePostController {
         Sort sortCondition = getSalePostSortCondition(sort);
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
-        PageResponse<MySalePostResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
+        PageResponse<MySalePostListResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

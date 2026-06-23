@@ -1,4 +1,4 @@
-package com.boothly.backend.dto.salepost;
+package com.boothly.backend.dto.salepost.detail;
 
 import com.boothly.backend.domain.salepost.ProductOption;
 import lombok.Builder;
