@@ -1,6 +1,7 @@
 package com.boothly.backend.domain.salepost;
 
 import com.boothly.backend.common.entity.BaseTimeEntity;
+import com.boothly.backend.common.exception.salepost.InvalidSaleStatusTransitionException;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.user.User;
 import jakarta.persistence.*;
@@ -53,12 +54,36 @@ public class SalePost extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String accountHolder;
 
-    public void close() {
-        if (this.saleStatus == SalePostStatus.CLOSED) {
-            return;
+    public void changeStatus(SalePostStatus targetStatus) {
+        switch (targetStatus) {
+            case CLOSED -> close();
+            case HIDDEN -> hide();
+            default -> throw new InvalidSaleStatusTransitionException(
+                    saleStatus,
+                    targetStatus
+            );
+        }
+    }
+    private void close() {
+        if (saleStatus != SalePostStatus.OPEN) {
+            throw new InvalidSaleStatusTransitionException(
+                    saleStatus,
+                    SalePostStatus.CLOSED
+            );
         }
 
-        this.saleStatus = SalePostStatus.CLOSED;
-        this.endAt = LocalDateTime.now();
+        saleStatus = SalePostStatus.CLOSED;
+        endAt = LocalDateTime.now();
+    }
+
+    private void hide(){
+        if (saleStatus != SalePostStatus.CLOSED) {
+            throw new InvalidSaleStatusTransitionException(
+                    saleStatus,
+                    SalePostStatus.HIDDEN
+            );
+        }
+
+        saleStatus = SalePostStatus.HIDDEN;
     }
 }

@@ -9,12 +9,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class SalePostCloseResponse {
+public class SalePostStatusChangeResponse {
     private Long salePostId;
     private SalePostStatus status;
 
-    public static SalePostCloseResponse from(SalePost salePost) {
-        return SalePostCloseResponse.builder()
+    public static SalePostStatusChangeResponse from(SalePost salePost) {
+        return SalePostStatusChangeResponse.builder()
                 .salePostId(salePost.getId())
                 .status(salePost.getSaleStatus())
                 .build();

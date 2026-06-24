@@ -2,8 +2,9 @@ package com.boothly.backend.controller;
 
 import com.boothly.backend.common.response.ApiResponse;
 import com.boothly.backend.common.validation.PageRequestValidator;
+import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.dto.PageResponse;
-import com.boothly.backend.dto.salepost.SalePostCloseResponse;
+import com.boothly.backend.dto.salepost.SalePostStatusChangeResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostListResponse;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
@@ -87,13 +88,14 @@ public class SalePostController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PatchMapping("/seller/sale-posts/{salePostId}/close")
-    public ResponseEntity<ApiResponse<SalePostCloseResponse>> closeSalePost(
+    @PatchMapping("/seller/sale-posts/{salePostId}/{salePostStatus}")
+    public ResponseEntity<ApiResponse<SalePostStatusChangeResponse>> changeSalePostStatus(
             @RequestParam Long sellerId,
-            @PathVariable Long salePostId
+            @PathVariable Long salePostId,
+            @PathVariable SalePostStatus salePostStatus
     ){
         return ResponseEntity.ok(ApiResponse.success(
-                salePostService.closeSalePost(sellerId, salePostId))
+                salePostService.changeSalePostStatus(sellerId, salePostId, salePostStatus))
         );
     }
 }

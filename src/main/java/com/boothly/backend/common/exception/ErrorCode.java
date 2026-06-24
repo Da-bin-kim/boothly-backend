@@ -86,6 +86,11 @@ public enum ErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR,
             "ORDER_ITEM_MISSING_FOR_ORDER",
             "주문 옵션 정보가 누락되었습니다."
+    ),
+    INVALID_SALE_STATUS_TRANSITION(
+            HttpStatus.CONFLICT,
+            "INVALID_SALE_STATUS_TRANSITION",
+            "허용되지 않은 판매 상태 변경입니다."
     )
     ;
 
