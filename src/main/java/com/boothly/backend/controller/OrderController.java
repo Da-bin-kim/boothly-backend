@@ -90,7 +90,7 @@ public class OrderController {
     }
 
     @PutMapping("/seller/sale-posts/{salePostId}/orders/{orderId}/{orderStatus}")
-    public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> changeOrderStatus(
+    public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> changeOrderStatusBySeller(
             @RequestParam Long sellerId,
             @PathVariable Long salePostId,
             @PathVariable Long orderId,
@@ -99,5 +99,15 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(
                 orderService.changeOrderStatus(sellerId, salePostId, orderId, orderStatus))
         );
+    }
+
+    @PutMapping("/orders/{orderId}/cancel")
+    public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> cancelOrderByBuyer(
+            @RequestParam Long buyerId,
+            @PathVariable Long orderId
+    ){
+        return ResponseEntity.ok(ApiResponse.success(
+                orderService.changeOrderStatus(buyerId, orderId)
+        ));
     }
 }

@@ -114,6 +114,20 @@ public class OrderService {
         return OrderStatusChangeResponse.from(order);
     }
 
+    @Transactional
+    public OrderStatusChangeResponse changeOrderStatus(
+            Long buyerId,
+            Long orderId
+    ){
+        Order order = orderRepository.findByBuyer_idAndId(buyerId, orderId)
+                .orElseThrow(()->new OrderNotFoundException(buyerId, orderId));
+
+        order.changeOrderStatus(OrderStatus.CANCELED);
+
+        return OrderStatusChangeResponse.from(order);
+    }
+
+
     private SalePost validateAndGetSalePost(Long salePostId) {
         SalePost salePost = salePostRepository.findById(salePostId).orElseThrow(() ->
                 new SalePostNotFoundException(salePostId));

@@ -21,4 +21,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = "salePost")
     Optional<Order> findBySalePost_User_IdAndSalePost_idAndId(Long sellerId, Long salePostId, Long orderId);
 
+    Optional<Order> findByBuyer_idAndId(Long buyerId, Long id);
 }
