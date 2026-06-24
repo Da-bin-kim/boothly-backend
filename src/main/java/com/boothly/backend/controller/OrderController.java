@@ -90,7 +90,7 @@ public class OrderController {
     }
 
     @PutMapping("/seller/sale-posts/{salePostId}/orders/{orderId}/{orderStatus}")
-    public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> changeSalePostStatus(
+    public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> changeOrderStatus(
             @RequestParam Long sellerId,
             @PathVariable Long salePostId,
             @PathVariable Long orderId,
