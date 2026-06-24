@@ -7,16 +7,31 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+    // Common
     INVALID_REQUEST(
             HttpStatus.BAD_REQUEST,
             "INVALID_REQUEST",
             "잘못된 요청입니다."
     ),
+    VALIDATION_FAILED(
+            HttpStatus.BAD_REQUEST,
+            "VALIDATION_FAILED",
+            "요청 값이 올바르지 않습니다."
+    ),
+    INTERNAL_SERVER_ERROR(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "INTERNAL_SERVER_ERROR",
+            "서버 내부 오류가 발생했습니다."
+    ),
+
+    // User
     USER_NOT_FOUND(
             HttpStatus.NOT_FOUND,
             "USER_NOT_FOUND",
             "사용자를 찾을 수 없습니다."
     ),
+
+    // SalePost
     SALE_POST_NOT_FOUND(
             HttpStatus.NOT_FOUND,
             "SALE_POST_NOT_FOUND",
@@ -27,16 +42,18 @@ public enum ErrorCode {
             "SALE_POST_INVALID_STATE",
             "판매글 정보를 불러오는 중 오류가 발생했습니다."
     ),
-    INTERNAL_SERVER_ERROR(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "INTERNAL_SERVER_ERROR",
-            "서버 내부 오류가 발생했습니다."
-    ),
     SALE_POST_NOT_OPEN(
             HttpStatus.CONFLICT,
             "SALE_POST_NOT_OPEN",
             "현재 판매 중인 게시글이 아닙니다."
     ),
+    INVALID_SALE_STATUS_TRANSITION(
+            HttpStatus.CONFLICT,
+            "INVALID_SALE_STATUS_TRANSITION",
+            "허용되지 않은 판매 상태 변경입니다."
+    ),
+
+    // Order
     INVALID_SALE_POST_OPTION(
             HttpStatus.CONFLICT,
             "INVALID_SALE_POST_OPTION",
@@ -71,11 +88,6 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "ORDER_NUMBER_DUPLICATED",
             "주문번호가 중복 발생했습니다."
-    ),
-    VALIDATION_FAILED(
-            HttpStatus.BAD_REQUEST,
-            "VALIDATION_FAILED",
-            "요청 값이 올바르지 않습니다."
     ),
     ORDER_NOT_FOUND(
             HttpStatus.NOT_FOUND,
