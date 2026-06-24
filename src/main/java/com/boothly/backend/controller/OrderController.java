@@ -2,7 +2,9 @@ package com.boothly.backend.controller;
 
 import com.boothly.backend.common.response.ApiResponse;
 import com.boothly.backend.common.validation.PageRequestValidator;
+import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.dto.PageResponse;
+import com.boothly.backend.dto.order.OrderStatusChangeResponse;
 import com.boothly.backend.dto.order.create.OrderCreateRequest;
 import com.boothly.backend.dto.order.create.OrderCreateResponse;
 import com.boothly.backend.dto.order.detail.OrderDetailResponse;
@@ -85,5 +87,17 @@ public class OrderController {
                 PageResponse.from(orderService.findSellerSalePostOrders(userId, salePostId, pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PutMapping("/seller/sale-posts/{salePostId}/orders/{orderId}/{orderStatus}")
+    public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> changeSalePostStatus(
+            @RequestParam Long sellerId,
+            @PathVariable Long salePostId,
+            @PathVariable Long orderId,
+            @PathVariable OrderStatus orderStatus
+    ){
+        return ResponseEntity.ok(ApiResponse.success(
+                orderService.changeOrderStatus(sellerId, salePostId, orderId, orderStatus))
+        );
     }
 }

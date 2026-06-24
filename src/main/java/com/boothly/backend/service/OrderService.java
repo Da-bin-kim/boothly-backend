@@ -14,6 +14,7 @@ import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
 import com.boothly.backend.domain.salepost.SalePost;
 import com.boothly.backend.domain.user.User;
+import com.boothly.backend.dto.order.OrderStatusChangeResponse;
 import com.boothly.backend.dto.order.create.OrderCreateRequest;
 import com.boothly.backend.dto.order.create.OrderCreateResponse;
 import com.boothly.backend.dto.order.create.OrderItemCreateRequest;
@@ -99,6 +100,19 @@ public class OrderService {
         });
     }
 
+    @Transactional
+    public OrderStatusChangeResponse changeOrderStatus(
+            Long sellerId,
+            Long salePostId,
+            Long orderId,
+            OrderStatus orderStatus) {
+        Order order = orderRepository.findBySalePost_User_IdAndSalePost_idAndId(sellerId, salePostId, orderId)
+                .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId));
+
+        order.changeOrderStatus(orderStatus);
+
+        return OrderStatusChangeResponse.from(order);
+    }
 
     private SalePost validateAndGetSalePost(Long salePostId) {
         SalePost salePost = salePostRepository.findById(salePostId).orElseThrow(() ->

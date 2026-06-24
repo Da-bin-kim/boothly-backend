@@ -17,4 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdAndBuyer_Id(Long orderId, Long userId);
 
     Page<Order> findBySalePost_Id(Long salePostId, Pageable pageable);
+
+    @EntityGraph(attributePaths = "salePost")
+    Optional<Order> findBySalePost_User_IdAndSalePost_idAndId(Long sellerId, Long salePostId, Long orderId);
+
 }
