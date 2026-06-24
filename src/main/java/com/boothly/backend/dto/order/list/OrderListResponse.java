@@ -17,6 +17,7 @@ public class OrderListResponse {
     private OrderSalePostResponse orderSalePostResponse;
     private OrderStatus status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static OrderListResponse from(Order order) {
         return OrderListResponse.builder()
@@ -25,6 +26,7 @@ public class OrderListResponse {
                 .orderSalePostResponse(OrderSalePostResponse.from(order.getSalePost()))
                 .status(order.getOrderStatus())
                 .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
                 .build();
     }
 }
