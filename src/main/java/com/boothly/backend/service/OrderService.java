@@ -101,7 +101,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusChangeResponse changeOrderStatus(
+    public OrderStatusChangeResponse cancelOrderByBuyer(
             Long sellerId,
             Long salePostId,
             Long orderId,
@@ -115,7 +115,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusChangeResponse changeOrderStatus(
+    public OrderStatusChangeResponse cancelOrderByBuyer(
             Long buyerId,
             Long orderId
     ){
