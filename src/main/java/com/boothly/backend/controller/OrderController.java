@@ -97,7 +97,7 @@ public class OrderController {
             @PathVariable OrderStatus orderStatus
     ){
         return ResponseEntity.ok(ApiResponse.success(
-                orderService.cancelOrderByBuyer(sellerId, salePostId, orderId, orderStatus))
+                orderService.changeOrderStatusBySeller(sellerId, salePostId, orderId, orderStatus))
         );
     }
 
@@ -107,7 +107,7 @@ public class OrderController {
             @PathVariable Long orderId
     ){
         return ResponseEntity.ok(ApiResponse.success(
-                orderService.cancelOrderByBuyer(buyerId, orderId)
+                orderService.cancelOrderStatusByBuyer(buyerId, orderId)
         ));
     }
 }
