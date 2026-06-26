@@ -110,6 +110,7 @@ public class OrderService {
                 .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId));
 
         order.changeOrderStatus(orderStatus);
+        //TODO:재고복구
 
         return OrderStatusChangeResponse.from(order);
     }
@@ -123,7 +124,7 @@ public class OrderService {
                 .orElseThrow(()->new OrderNotFoundException(buyerId, orderId));
 
         order.changeOrderStatus(OrderStatus.CANCELED);
-
+        //TODO:재고복구
         return OrderStatusChangeResponse.from(order);
     }
 
@@ -259,6 +260,10 @@ public class OrderService {
                     0
             );
         }
+    }
+
+    private void increase(){
+        //TODO
     }
 
     private String generateUniqueOrderNumber() {

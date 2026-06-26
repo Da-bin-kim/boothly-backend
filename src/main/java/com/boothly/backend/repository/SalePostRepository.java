@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface SalePostRepository extends JpaRepository<SalePost, Long> {
     @EntityGraph(attributePaths = "user")
-    Page<SalePost> findBysaleStatusAndTitleContaining(SalePostStatus status, String keyword, Pageable pageable);
+    Page<SalePost> findBySaleStatusAndTitleContaining(SalePostStatus status, String keyword, Pageable pageable);
 
     Page<SalePost> findByUser_IdAndTitleContaining(Long userId, String keyword, Pageable pageable);
 

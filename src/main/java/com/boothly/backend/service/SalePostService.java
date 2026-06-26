@@ -139,7 +139,7 @@ public class SalePostService {
             Pageable pageable
     ){
         return salePostRepository
-                .findBysaleStatusAndTitleContaining(SalePostStatus.OPEN, keyword, pageable)
+                .findBySaleStatusAndTitleContaining(SalePostStatus.OPEN, keyword, pageable)
                 .map(SalePostListResponse::from);
     }
 
