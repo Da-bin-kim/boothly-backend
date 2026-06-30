@@ -1,5 +1,6 @@
 package com.boothly.backend.service;
 
+import com.boothly.backend.common.exception.order.InvalidOrderStatusTransitionException;
 import com.boothly.backend.common.exception.order.OrderCreationException;
 import com.boothly.backend.common.exception.order.OrderItemMissingForOrderException;
 import com.boothly.backend.common.exception.order.OrderNotFoundException;
@@ -109,10 +110,21 @@ public class OrderService {
         Order order = orderRepository.findBySalePost_User_IdAndSalePost_idAndId(sellerId, salePostId, orderId)
                 .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId));
 
-        order.changeOrderStatus(orderStatus);
-        //TODO:재고복구
-
-        return OrderStatusChangeResponse.from(order);
+        if (orderStatus == OrderStatus.CANCELED){
+            int update = orderRepository.cancelRequestedOrderBySeller(sellerId, salePostId, orderId);
+            if(update == 0){
+                throw new InvalidOrderStatusTransitionException(
+                        order.getOrderStatus(),
+                        OrderStatus.CANCELED
+                );
+            }
+            restoreStock(salePostId, orderId);
+        }else{
+            order.changeOrderStatus(orderStatus);
+        }
+        return OrderStatusChangeResponse.from(
+               orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(sellerId, orderId))
+        );
     }
 
     @Transactional
@@ -123,9 +135,17 @@ public class OrderService {
         Order order = orderRepository.findByBuyer_idAndId(buyerId, orderId)
                 .orElseThrow(()->new OrderNotFoundException(buyerId, orderId));
 
-        order.changeOrderStatus(OrderStatus.CANCELED);
-        //TODO:재고복구
-        return OrderStatusChangeResponse.from(order);
+        int update = orderRepository.cancelRequestedOrderByBuyer(buyerId, orderId);
+        if(update == 0){
+            throw new InvalidOrderStatusTransitionException(
+                    order.getOrderStatus(),
+                    OrderStatus.CANCELED
+            );
+        }
+        restoreStock(order.getSalePost().getId(), orderId);
+        return OrderStatusChangeResponse.from(
+                orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(buyerId, orderId))
+        );
     }
 
 
@@ -262,8 +282,26 @@ public class OrderService {
         }
     }
 
-    private void increase(){
-        //TODO
+    private void restoreStock(Long salePostId, Long orderId){
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_id(orderId);
+
+        for(OrderItem orderItem : orderItems){
+            int restoreQuantity = orderItem.getQuantity();
+            Long productOptionId = orderItem.getProductOption().getId();
+
+            int update = productOptionRepository.restoreStock(
+                    salePostId,
+                    productOptionId,
+                    restoreQuantity
+            );
+
+            if(update == 0){
+                throw new InvalidSalePostOptionException(
+                        salePostId,
+                        orderItem.getProductOption().getId()
+                );
+            }
+        }
     }
 
     private String generateUniqueOrderNumber() {

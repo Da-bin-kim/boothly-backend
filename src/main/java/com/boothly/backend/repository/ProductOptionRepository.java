@@ -22,4 +22,13 @@ public interface ProductOptionRepository extends JpaRepository<ProductOption, Lo
           and po.stockQuantity >= :quantity
     """)
     int decreaseStock(Long salePostId, Long productOptionId, int quantity);
+
+    @Modifying
+    @Query("""
+        update ProductOption po
+        set po.stockQuantity = po.stockQuantity + :restoreQuantity
+        where po.id = :productOptionId
+          and po.salePost.id = :salePostId
+    """)
+    int restoreStock(Long salePostId, Long productOptionId, int restoreQuantity);
 }

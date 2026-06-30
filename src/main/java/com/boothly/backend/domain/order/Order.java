@@ -80,7 +80,11 @@ public class Order extends BaseTimeEntity {
             case REQUESTED -> request();
             case CONFIRMED -> confirm();
             case COMPLETED -> complete();
-            case CANCELED -> cancel();
+            default -> {
+                throw new InvalidOrderStatusTransitionException(
+                        this.orderStatus, orderStatus
+                );
+            }
         }
     }
 
@@ -99,14 +103,6 @@ public class Order extends BaseTimeEntity {
             );
         }
         orderStatus = OrderStatus.CONFIRMED;
-    }
-    private void cancel() {
-        if (orderStatus != OrderStatus.REQUESTED) {
-            throw new InvalidOrderStatusTransitionException(
-                    orderStatus, OrderStatus.CANCELED
-            );
-        }
-        orderStatus = OrderStatus.CANCELED;
     }
     private void complete() {
         if (orderStatus != OrderStatus.CONFIRMED) {
