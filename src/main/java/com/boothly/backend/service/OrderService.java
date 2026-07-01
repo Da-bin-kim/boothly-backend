@@ -106,22 +106,34 @@ public class OrderService {
             Long sellerId,
             Long salePostId,
             Long orderId,
-            OrderStatus orderStatus) {
-        Order order = orderRepository.findBySalePost_User_IdAndSalePost_idAndId(sellerId, salePostId, orderId)
-                .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId));
+            OrderStatus targetOrderStatus) {
 
-        if (orderStatus == OrderStatus.CANCELED){
-            int update = orderRepository.cancelRequestedOrderBySeller(sellerId, salePostId, orderId);
-            if(update == 0){
-                throw new InvalidOrderStatusTransitionException(
-                        order.getOrderStatus(),
-                        OrderStatus.CANCELED
-                );
-            }
-            restoreStock(salePostId, orderId);
-        }else{
-            order.changeOrderStatus(orderStatus);
+        OrderStatus expectedCurrentStatus;
+        switch (targetOrderStatus) {
+            case CONFIRMED, CANCELED -> expectedCurrentStatus = OrderStatus.REQUESTED;
+            case REQUESTED, COMPLETED -> expectedCurrentStatus = OrderStatus.CONFIRMED;
+            default -> throw new InvalidOrderStatusTransitionException(
+                    orderRepository.findBySalePost_User_IdAndSalePost_idAndId(sellerId, salePostId, orderId)
+                            .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId))
+                            .getOrderStatus(),
+                    targetOrderStatus
+            );
         }
+
+        int update = orderRepository.changeOrderStatusBySeller(sellerId, salePostId, orderId, expectedCurrentStatus, targetOrderStatus);
+        if(update == 0){
+            throw new InvalidOrderStatusTransitionException(
+                    orderRepository.findBySalePost_User_IdAndSalePost_idAndId(sellerId, salePostId, orderId)
+                            .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId))
+                            .getOrderStatus(),
+                    targetOrderStatus
+            );
+        }
+
+        if( targetOrderStatus == OrderStatus.CANCELED ){
+            restoreStock(salePostId, orderId);
+        }
+
         return OrderStatusChangeResponse.from(
                orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(sellerId, orderId))
         );
@@ -361,6 +373,5 @@ public class OrderService {
 
         return matchedOrderItemMap;
     }
-
 }
 

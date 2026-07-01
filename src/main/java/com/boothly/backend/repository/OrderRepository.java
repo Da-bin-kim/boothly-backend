@@ -1,5 +1,6 @@
 package com.boothly.backend.repository;
 
+import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.domain.order.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,11 +39,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying(clearAutomatically = true)
     @Query("""
         update Order o
-        set o.orderStatus = com.boothly.backend.domain.enums.OrderStatus.CANCELED
+        set o.orderStatus = :targetOrderStatus
         where o.id = :orderId
           and o.salePost.id = :salePostId
           and o.salePost.user.id = :sellerId
-          and o.orderStatus = com.boothly.backend.domain.enums.OrderStatus.REQUESTED
+          and o.orderStatus = :expectedCurrentStatus
     """)
-    int cancelRequestedOrderBySeller(Long sellerId, Long salePostId, Long orderId);
+    int changeOrderStatusBySeller(Long sellerId, Long salePostId, Long orderId, OrderStatus expectedCurrentStatus, OrderStatus targetOrderStatus);
 }

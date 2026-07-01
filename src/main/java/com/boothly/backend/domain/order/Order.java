@@ -1,7 +1,6 @@
 package com.boothly.backend.domain.order;
 
 import com.boothly.backend.common.entity.BaseTimeEntity;
-import com.boothly.backend.common.exception.order.InvalidOrderStatusTransitionException;
 import com.boothly.backend.domain.enums.DeliveryType;
 import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.domain.salepost.SalePost;
@@ -74,42 +73,4 @@ public class Order extends BaseTimeEntity {
 
     @Column(name = "account_holder", nullable = false, length = 50)
     private String accountHolder;
-
-    public void changeOrderStatus(OrderStatus orderStatus) {
-        switch (orderStatus) {
-            case REQUESTED -> request();
-            case CONFIRMED -> confirm();
-            case COMPLETED -> complete();
-            default -> {
-                throw new InvalidOrderStatusTransitionException(
-                        this.orderStatus, orderStatus
-                );
-            }
-        }
-    }
-
-    private void request() {
-        if (orderStatus != OrderStatus.CONFIRMED) {
-            throw new InvalidOrderStatusTransitionException(
-                    orderStatus, OrderStatus.REQUESTED
-            );
-        }
-        orderStatus = OrderStatus.REQUESTED;
-    }
-    private void confirm() {
-        if (orderStatus != OrderStatus.REQUESTED) {
-            throw new InvalidOrderStatusTransitionException(
-                    orderStatus, OrderStatus.CONFIRMED
-            );
-        }
-        orderStatus = OrderStatus.CONFIRMED;
-    }
-    private void complete() {
-        if (orderStatus != OrderStatus.CONFIRMED) {
-            throw new InvalidOrderStatusTransitionException(
-                    orderStatus, OrderStatus.COMPLETED
-            );
-        }
-        orderStatus = OrderStatus.COMPLETED;
-    }
 }
