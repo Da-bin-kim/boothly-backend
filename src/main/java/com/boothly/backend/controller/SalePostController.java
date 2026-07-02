@@ -5,6 +5,7 @@ import com.boothly.backend.common.validation.PageRequestValidator;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.dto.PageResponse;
 import com.boothly.backend.dto.salepost.SalePostStatusChangeResponse;
+import com.boothly.backend.dto.salepost.create.SalePostCreateResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
@@ -28,15 +29,15 @@ public class SalePostController {
     private final SalePostService salePostService;
 
     @PostMapping("/sale-posts")
-    public ResponseEntity<ApiResponse<Long>> create(
+    public ResponseEntity<ApiResponse<SalePostCreateResponse>> create(
             @RequestParam Long sellerId,
             @Valid @RequestBody SalePostCreateRequest request
     ) {
-        Long salePostId = salePostService.createSalePost(sellerId, request);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(salePostId));
+                .body(ApiResponse.success(
+                        salePostService.createSalePost(sellerId, request)
+                ));
     }
 
     @GetMapping("/sale-posts")
@@ -66,7 +67,7 @@ public class SalePostController {
 
     @GetMapping("/sale-posts/{salePostId}")
     public ResponseEntity<ApiResponse<SalePostDetailResponse>> getDetail(
-            @RequestParam Long userId,
+            @RequestParam(required = false) Long userId,
             @PathVariable Long salePostId
     ){
         return ResponseEntity.ok(ApiResponse.success(salePostService.findSalePostDetail(userId, salePostId)));

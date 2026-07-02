@@ -12,6 +12,7 @@ import com.boothly.backend.dto.salepost.SalePostStatusChangeResponse;
 import com.boothly.backend.dto.salepost.create.DeliveryMethodCreateRequest;
 import com.boothly.backend.dto.salepost.create.ProductOptionCreateRequest;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
+import com.boothly.backend.dto.salepost.create.SalePostCreateResponse;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
@@ -44,7 +45,7 @@ public class SalePostService {
      * @return 생성된 판매글 ID
      */
     @Transactional
-    public Long createSalePost(Long sellerId, SalePostCreateRequest request) {
+    public SalePostCreateResponse createSalePost(Long sellerId, SalePostCreateRequest request) {
         /* 유효성 검증 */
         User seller = userRepository.findById(sellerId).orElseThrow(() ->
                 new UserNotFoundException(sellerId));
@@ -70,7 +71,7 @@ public class SalePostService {
         saveProductOptions(savedSalePost, request.getProductOptions());
         saveDeliveryMethods(savedSalePost, request.getDeliveryMethods());
 
-        return savedSalePost.getId();
+        return new SalePostCreateResponse(savedSalePost.getId());
     }
 
     private void validateSalePeriod(SalePostCreateRequest request) {
