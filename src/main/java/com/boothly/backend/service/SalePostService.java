@@ -143,9 +143,16 @@ public class SalePostService {
                 .map(SalePostListResponse::from);
     }
 
-    public SalePostDetailResponse findSalePostDetail(Long salePostId) {
+    public SalePostDetailResponse findSalePostDetail(Long userId, Long salePostId) {
         SalePost salePost = salePostRepository.findById(salePostId).orElseThrow(() ->
                 new SalePostNotFoundException(salePostId));
+
+        boolean isOpen = salePost.getSaleStatus() == SalePostStatus.OPEN;
+        boolean isOwner = salePost.getUser().getId().equals(userId);
+
+        if(!isOpen && !isOwner) {
+                throw new SalePostNotFoundException(salePostId);
+        }
 
         List<ProductOption> productOptions = productOptionRepository.findAllBySalePostIdOrderByDisplayOrder(salePostId);
         if(productOptions.isEmpty()){

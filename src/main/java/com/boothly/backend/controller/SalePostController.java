@@ -66,9 +66,10 @@ public class SalePostController {
 
     @GetMapping("/sale-posts/{salePostId}")
     public ResponseEntity<ApiResponse<SalePostDetailResponse>> getDetail(
+            @RequestParam Long userId,
             @PathVariable Long salePostId
     ){
-        return ResponseEntity.ok(ApiResponse.success(salePostService.findSalePostDetail(salePostId)));
+        return ResponseEntity.ok(ApiResponse.success(salePostService.findSalePostDetail(userId, salePostId)));
     }
 
     @GetMapping("/seller/sale-posts")
