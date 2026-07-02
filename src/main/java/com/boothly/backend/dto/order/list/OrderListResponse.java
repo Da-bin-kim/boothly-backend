@@ -12,19 +12,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class OrderListResponse {
-    private Long id;
+    private Long orderId;
     private String orderNumber;
-    private OrderSalePostResponse orderSalePostResponse;
-    private OrderStatus status;
+    private OrderSalePostResponse salePost;
+    private OrderStatus orderStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public static OrderListResponse from(Order order) {
         return OrderListResponse.builder()
-                .id(order.getId())
+                .orderId(order.getId())
                 .orderNumber(order.getOrderNumber())
-                .orderSalePostResponse(OrderSalePostResponse.from(order.getSalePost()))
-                .status(order.getOrderStatus())
+                .salePost(OrderSalePostResponse.from(order.getSalePost()))
+                .orderStatus(order.getOrderStatus())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();

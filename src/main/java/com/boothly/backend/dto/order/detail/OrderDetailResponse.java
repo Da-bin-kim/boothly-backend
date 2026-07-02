@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class OrderDetailResponse {
-    private Long id;
+    private Long orderId;
     private String orderNumber;
-    private OrderStatus status;
+    private OrderStatus orderStatus;
     private OrderSalePostDetailResponse salePost;
     private List<OrderItemDetailResponse> orderItems;
     private PaymentInfoResponse paymentInfo;
@@ -34,9 +34,9 @@ public class OrderDetailResponse {
                         .collect(Collectors.toList());
 
         return OrderDetailResponse.builder()
-                .id(order.getId())
+                .orderId(order.getId())
                 .orderNumber(order.getOrderNumber())
-                .status(order.getOrderStatus())
+                .orderStatus(order.getOrderStatus())
                 .salePost(orderSalePostDetailResponse)
                 .orderItems(orderItemDetailResponses)
                 .paymentInfo(PaymentInfoResponse.from(order))

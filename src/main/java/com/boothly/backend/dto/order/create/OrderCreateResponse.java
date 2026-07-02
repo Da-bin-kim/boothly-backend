@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class OrderCreateResponse {
-    private final long id;
+    private final long orderId;
     private final String orderNumber;
     private final long salePostId;
     private final OrderStatus orderStatus;
@@ -39,7 +39,7 @@ public class OrderCreateResponse {
         PriceInfoResponse priceInfoResponse = PriceInfoResponse.from(order);
 
         return OrderCreateResponse.builder()
-                .id(order.getId())
+                .orderId(order.getId())
                 .orderNumber(order.getOrderNumber())
                 .salePostId(order.getSalePost().getId())
                 .orderStatus(order.getOrderStatus())

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class SalePostListResponse {
-    private Long id;
+    private Long salePostId;
     private Long sellerId;
     private String sellerNickname;
     private String title;
@@ -21,7 +21,7 @@ public class SalePostListResponse {
 
     public static SalePostListResponse from(SalePost salePost) {
         return SalePostListResponse.builder()
-                .id(salePost.getId())
+                .salePostId(salePost.getId())
                 .sellerId(salePost.getUser().getId())
                 .sellerNickname(salePost.getUser().getNickname())
                 .title(salePost.getTitle())
@@ -34,8 +34,8 @@ public class SalePostListResponse {
     }
 
     @Builder
-    public SalePostListResponse(Long id, Long sellerId, String sellerNickname, String title, SalePostStatus saleStatus, LocalDateTime startAt, LocalDateTime endAt, String thumbnailImageUrl, LocalDateTime createdAt) {
-        this.id = id;
+    public SalePostListResponse(Long salePostId, Long sellerId, String sellerNickname, String title, SalePostStatus saleStatus, LocalDateTime startAt, LocalDateTime endAt, String thumbnailImageUrl, LocalDateTime createdAt) {
+        this.salePostId = salePostId;
         this.sellerId = sellerId;
         this.sellerNickname = sellerNickname;
         this.title = title;

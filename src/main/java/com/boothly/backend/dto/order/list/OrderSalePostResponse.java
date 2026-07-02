@@ -9,13 +9,13 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class OrderSalePostResponse {
-    private Long salePostId;
+    private Long id;
     private String title;
     private String thumbnailImageUrl;
 
     public static OrderSalePostResponse from(SalePost salePost) {
         return OrderSalePostResponse.builder()
-                .salePostId(salePost.getId())
+                .id(salePost.getId())
                 .title(salePost.getTitle())
                 .thumbnailImageUrl(salePost.getThumbnailImageUrl())
                 .build();

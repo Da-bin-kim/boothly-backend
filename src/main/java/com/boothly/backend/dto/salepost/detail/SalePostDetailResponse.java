@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class SalePostDetailResponse {
-    private final long id;
+    private final long salePostId;
     private final SellerResponse seller;
     private final String title;
     private final String content;
@@ -42,7 +42,7 @@ public class SalePostDetailResponse {
                         .collect(Collectors.toList());
 
         return SalePostDetailResponse.builder()
-                .id(salePost.getId())
+                .salePostId(salePost.getId())
                 .seller(SellerResponse.from(salePost.getUser()))
                 .title(salePost.getTitle())
                 .content(salePost.getContent())
@@ -60,8 +60,8 @@ public class SalePostDetailResponse {
     }
 
     @Builder
-    private SalePostDetailResponse(long id, SellerResponse seller, String title, String content, SalePostStatus saleStatus, LocalDateTime startAt, LocalDateTime endAt, LocalDate fulfillmentDate, String thumbnailImageUrl, String bankName, String accountNumber, String accountHolder, List<ProductOptionResponse> productOptions, List<DeliveryMethodResponse> deliveryMethods) {
-        this.id = id;
+    private SalePostDetailResponse(long salePostId, SellerResponse seller, String title, String content, SalePostStatus saleStatus, LocalDateTime startAt, LocalDateTime endAt, LocalDate fulfillmentDate, String thumbnailImageUrl, String bankName, String accountNumber, String accountHolder, List<ProductOptionResponse> productOptions, List<DeliveryMethodResponse> deliveryMethods) {
+        this.salePostId = salePostId;
         this.seller = seller;
         this.title = title;
         this.content = content;
