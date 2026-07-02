@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class MySalePostListResponse {
+public class MySalePostOverviewResponse {
     private Long salePostId;
     private String title;
     private SalePostStatus saleStatus;
@@ -18,8 +18,8 @@ public class MySalePostListResponse {
     private LocalDateTime endAt;
     private LocalDateTime createdAt;
 
-    public static MySalePostListResponse from(SalePost salePost) {
-        return MySalePostListResponse.builder()
+    public static MySalePostOverviewResponse from(SalePost salePost) {
+        return MySalePostOverviewResponse.builder()
                 .salePostId(salePost.getId())
                 .title(salePost.getTitle())
                 .saleStatus(salePost.getSaleStatus())

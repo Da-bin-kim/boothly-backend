@@ -13,7 +13,7 @@ import com.boothly.backend.dto.salepost.create.DeliveryMethodCreateRequest;
 import com.boothly.backend.dto.salepost.create.ProductOptionCreateRequest;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
-import com.boothly.backend.dto.salepost.list.MySalePostListResponse;
+import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
 import com.boothly.backend.repository.DeliveryMethodRepository;
 import com.boothly.backend.repository.ProductOptionRepository;
@@ -160,13 +160,13 @@ public class SalePostService {
         return SalePostDetailResponse.from(salePost, productOptions, deliveryMethods);
     }
 
-    public Page<MySalePostListResponse> findMySalePosts(
+    public Page<MySalePostOverviewResponse> findMySalePosts(
             Long userId,
             String keyword,
             Pageable pageable
     ) {
         return salePostRepository.findByUser_IdAndTitleContaining(userId, keyword, pageable)
-                .map(MySalePostListResponse::from);
+                .map(MySalePostOverviewResponse::from);
     }
 
     @Transactional
@@ -180,5 +180,15 @@ public class SalePostService {
         salePost.changeStatus(salePostStatus);
 
         return SalePostStatusChangeResponse.from(salePost);
+    }
+
+    public MySalePostOverviewResponse findMySalePost(
+            Long sellerId,
+            Long salePostId) {
+        return MySalePostOverviewResponse.from(
+            salePostRepository
+                    .findByIdAndUser_Id(salePostId, sellerId)
+                    .orElseThrow(() -> new SalePostNotFoundException(salePostId))
+        );
     }
 }

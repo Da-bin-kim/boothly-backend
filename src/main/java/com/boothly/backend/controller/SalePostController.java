@@ -5,7 +5,7 @@ import com.boothly.backend.common.validation.PageRequestValidator;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.dto.PageResponse;
 import com.boothly.backend.dto.salepost.SalePostStatusChangeResponse;
-import com.boothly.backend.dto.salepost.list.MySalePostListResponse;
+import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
@@ -72,7 +72,7 @@ public class SalePostController {
     }
 
     @GetMapping("/seller/sale-posts")
-    public ResponseEntity<ApiResponse<PageResponse<MySalePostListResponse>>> getMySalePosts(
+    public ResponseEntity<ApiResponse<PageResponse<MySalePostOverviewResponse>>> getMySalePosts(
             @RequestParam Long userId,
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -83,7 +83,7 @@ public class SalePostController {
         Sort sortCondition = getSalePostSortCondition(sort);
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
-        PageResponse<MySalePostListResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
+        PageResponse<MySalePostOverviewResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -97,5 +97,15 @@ public class SalePostController {
         return ResponseEntity.ok(ApiResponse.success(
                 salePostService.changeSalePostStatus(sellerId, salePostId, salePostStatus))
         );
+    }
+
+    @GetMapping("/seller/sale-posts/{salePostId}")
+    public ResponseEntity<ApiResponse<MySalePostOverviewResponse>> getMySalePost(
+            @RequestParam Long userId,
+            @PathVariable Long salePostId
+    ){
+        return ResponseEntity.ok(ApiResponse.success(
+                salePostService.findMySalePost(userId, salePostId)
+        ));
     }
 }
