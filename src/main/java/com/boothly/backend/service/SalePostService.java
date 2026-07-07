@@ -95,7 +95,7 @@ public class SalePostService {
         List<ProductOption> productOptions = requests.stream()
                 .map(request -> ProductOption.builder()
                         .salePost(salePost)
-                        .active(request.isActive())
+                        .active(true)
                         .displayOrder(request.getDisplayOrder())
                         .name(request.getName())
                         .description(request.getDescription())
@@ -127,7 +127,7 @@ public class SalePostService {
                         .methodName(request.getMethodName())
                         .deliveryType(request.getDeliveryType())
                         .deliveryFee(request.getDeliveryFee())
-                        .active(request.isActive())
+                        .active(true)
                         .build())
                 .toList();
 

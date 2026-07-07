@@ -18,6 +18,4 @@ public class DeliveryMethodCreateRequest {
 
     @PositiveOrZero
     private int deliveryFee;
-
-    private boolean active;
 }

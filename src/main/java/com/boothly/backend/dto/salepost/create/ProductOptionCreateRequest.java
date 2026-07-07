@@ -8,8 +8,6 @@ import lombok.Getter;
 
 @Getter
 public class ProductOptionCreateRequest {
-    private boolean active;
-
     @PositiveOrZero
     private int displayOrder;
 
