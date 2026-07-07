@@ -1,8 +1,10 @@
 package com.boothly.backend.service;
 
 import com.boothly.backend.common.exception.salepost.InvalidSalePostStateException;
+import com.boothly.backend.common.exception.salepost.SalePostHasActiveOrdersException;
 import com.boothly.backend.common.exception.salepost.SalePostNotFoundException;
 import com.boothly.backend.common.exception.user.UserNotFoundException;
+import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.domain.enums.SalePostStatus;
 import com.boothly.backend.domain.salepost.DeliveryMethod;
 import com.boothly.backend.domain.salepost.ProductOption;
@@ -16,10 +18,7 @@ import com.boothly.backend.dto.salepost.create.SalePostCreateResponse;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
-import com.boothly.backend.repository.DeliveryMethodRepository;
-import com.boothly.backend.repository.ProductOptionRepository;
-import com.boothly.backend.repository.SalePostRepository;
-import com.boothly.backend.repository.UserRepository;
+import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +35,7 @@ public class SalePostService {
     private final UserRepository userRepository;
     private final ProductOptionRepository productOptionRepository;
     private final DeliveryMethodRepository deliveryMethodRepository;
+    private final OrderRepository orderRepository;
 
     /**
      * 판매글을 생성한다.
@@ -185,6 +185,10 @@ public class SalePostService {
         SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
                 .orElseThrow(() -> new SalePostNotFoundException(salePostId));
 
+        if(salePost.getSaleStatus() == SalePostStatus.CLOSED
+                && salePostStatus == SalePostStatus.HIDDEN){
+            validateActiveOrders(salePostId);
+        }
         salePost.changeStatus(salePostStatus);
 
         return SalePostStatusChangeResponse.from(salePost);
@@ -198,5 +202,16 @@ public class SalePostService {
                     .findByIdAndUser_Id(salePostId, sellerId)
                     .orElseThrow(() -> new SalePostNotFoundException(salePostId))
         );
+    }
+
+    private void validateActiveOrders(Long salePostId){
+        boolean existsActiveOrders = orderRepository.existsBySalePost_IdAndOrderStatusIn(
+                        salePostId,
+                        List.of(OrderStatus.REQUESTED, OrderStatus.CONFIRMED)
+                );
+
+        if (existsActiveOrders) {
+            throw new SalePostHasActiveOrdersException(salePostId);
+        }
     }
 }

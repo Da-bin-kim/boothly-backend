@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -46,4 +47,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
           and o.orderStatus = :expectedCurrentStatus
     """)
     int changeOrderStatusBySeller(Long sellerId, Long salePostId, Long orderId, OrderStatus expectedCurrentStatus, OrderStatus targetOrderStatus);
+
+    boolean existsBySalePost_IdAndOrderStatusIn(
+            Long salePostId,
+            List <OrderStatus> orderStatusList
+    );
 }

@@ -52,6 +52,11 @@ public enum ErrorCode {
             "INVALID_SALE_STATUS_TRANSITION",
             "허용되지 않은 판매 상태 변경입니다."
     ),
+    SALE_POST_HAS_ACTIVE_ORDERS(
+            HttpStatus.CONFLICT,
+            "SALE_POST_HAS_ACTIVE_ORDERS",
+            "처리 중인 주문이 남아 있어 판매글을 숨길 수 없습니다."
+    ),
 
     // Order
     INVALID_SALE_POST_OPTION(
