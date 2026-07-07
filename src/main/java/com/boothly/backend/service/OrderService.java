@@ -71,9 +71,9 @@ public class OrderService {
                 .map(OrderListResponse::from);
     }
 
-    public OrderDetailResponse findOrderDetail(Long orderId, Long userId) {
-        Order order = orderRepository.findByIdAndBuyer_Id(orderId, userId).orElseThrow(() ->
-                new OrderNotFoundException(userId, orderId));
+    public OrderDetailResponse findBuyerOrderDetail(Long orderId, Long buyerId) {
+        Order order = orderRepository.findByIdAndBuyer_Id(orderId, buyerId).orElseThrow(() ->
+                new OrderNotFoundException(buyerId, orderId));
         List<OrderItem> orderItems = validateAndGetOrderItems(orderId);
 
         return  OrderDetailResponse.from(order, orderItems);

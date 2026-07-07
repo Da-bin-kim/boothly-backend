@@ -57,11 +57,11 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrderDetail(
-            @RequestParam Long userId,
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> getBuyerOrderDetail(
+            @RequestParam Long buyerId,
             @PathVariable Long orderId
     ){
-        OrderDetailResponse response = orderService.findOrderDetail(orderId, userId);
+        OrderDetailResponse response = orderService.findBuyerOrderDetail(orderId, buyerId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
