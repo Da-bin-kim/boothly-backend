@@ -62,12 +62,12 @@ public class OrderService {
         return OrderCreateResponse.from(order, orderItems);
     }
 
-    public Page<OrderListResponse> findMyOrders(
-            Long userId,
+    public Page<OrderListResponse> findBuyerOrders(
+            Long buyerId,
             String keyword,
             Pageable pageable) {
 
-        return orderRepository.findByBuyer_IdAndSalePost_TitleContaining(userId, keyword, pageable)
+        return orderRepository.findByBuyer_IdAndSalePost_TitleContaining(buyerId, keyword, pageable)
                 .map(OrderListResponse::from);
     }
 

@@ -16,7 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     boolean existsByOrderNumber(String orderNumber);
 
     @EntityGraph(attributePaths = "salePost")
-    Page<Order> findByBuyer_IdAndSalePost_TitleContaining(Long userId, String title, Pageable pageable);
+    Page<Order> findByBuyer_IdAndSalePost_TitleContaining(Long buyerId, String title, Pageable pageable);
 
     Optional<Order> findByIdAndBuyer_Id(Long orderId, Long userId);
 
