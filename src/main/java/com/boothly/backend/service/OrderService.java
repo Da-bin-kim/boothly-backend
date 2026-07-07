@@ -79,8 +79,8 @@ public class OrderService {
         return  OrderDetailResponse.from(order, orderItems);
     }
 
-    public Page<SellerSalePostOrderResponse> findSellerSalePostOrders(Long userId, Long salePostId, Pageable pageable) {
-        validateSalePostOwner(userId, salePostId);
+    public Page<SellerSalePostOrderResponse> findSellerSalePostOrders(Long sellerId, Long salePostId, Pageable pageable) {
+        validateSalePostOwner(sellerId, salePostId);
 
         Page<Order> orders = orderRepository.findBySalePost_Id(salePostId,pageable);
 
