@@ -75,7 +75,7 @@ public class SalePostController {
 
     @GetMapping("/seller/sale-posts")
     public ResponseEntity<ApiResponse<PageResponse<MySalePostOverviewResponse>>> getMySalePosts(
-            @RequestParam Long userId,
+            @RequestParam Long sellerId,
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -85,7 +85,7 @@ public class SalePostController {
         Sort sortCondition = getSalePostSortCondition(sort);
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
-        PageResponse<MySalePostOverviewResponse> response = PageResponse.from(salePostService.findMySalePosts(userId, keyword, pageable));
+        PageResponse<MySalePostOverviewResponse> response = PageResponse.from(salePostService.findMySalePosts(sellerId, keyword, pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -103,11 +103,11 @@ public class SalePostController {
 
     @GetMapping("/seller/sale-posts/{salePostId}")
     public ResponseEntity<ApiResponse<MySalePostOverviewResponse>> getMySalePost(
-            @RequestParam Long userId,
+            @RequestParam Long sellerId,
             @PathVariable Long salePostId
     ){
         return ResponseEntity.ok(ApiResponse.success(
-                salePostService.findMySalePost(userId, salePostId)
+                salePostService.findMySalePost(sellerId, salePostId)
         ));
     }
 }

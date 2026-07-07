@@ -67,7 +67,7 @@ public class OrderController {
 
     @GetMapping("/seller/sale-posts/{salePostId}/orders")
     public ResponseEntity<ApiResponse<PageResponse<SellerSalePostOrderResponse>>> getSellerSalePostOrders(
-            @RequestParam Long userId,
+            @RequestParam Long sellerId,
             @PathVariable Long salePostId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -84,7 +84,7 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page, size, sortCondition);
 
         PageResponse<SellerSalePostOrderResponse> response =
-                PageResponse.from(orderService.findSellerSalePostOrders(userId, salePostId, pageable));
+                PageResponse.from(orderService.findSellerSalePostOrders(sellerId, salePostId, pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

@@ -14,7 +14,7 @@ public interface SalePostRepository extends JpaRepository<SalePost, Long> {
     @EntityGraph(attributePaths = "user")
     Page<SalePost> findBySaleStatusAndTitleContaining(SalePostStatus status, String keyword, Pageable pageable);
 
-    Page<SalePost> findByUser_IdAndTitleContaining(Long userId, String keyword, Pageable pageable);
+    Page<SalePost> findByUser_IdAndTitleContaining(Long sellerId, String keyword, Pageable pageable);
 
     boolean existsByIdAndUser_Id(Long salePostId, Long userId);
 

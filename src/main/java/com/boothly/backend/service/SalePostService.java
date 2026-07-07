@@ -169,11 +169,11 @@ public class SalePostService {
     }
 
     public Page<MySalePostOverviewResponse> findMySalePosts(
-            Long userId,
+            Long sellerId,
             String keyword,
             Pageable pageable
     ) {
-        return salePostRepository.findByUser_IdAndTitleContaining(userId, keyword, pageable)
+        return salePostRepository.findByUser_IdAndTitleContaining(sellerId, keyword, pageable)
                 .map(MySalePostOverviewResponse::from);
     }
 
