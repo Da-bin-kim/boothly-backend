@@ -89,7 +89,7 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PutMapping("/seller/sale-posts/{salePostId}/orders/{orderId}/{orderStatus}")
+    @PatchMapping("/seller/sale-posts/{salePostId}/orders/{orderId}/{orderStatus}")
     public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> changeOrderStatusBySeller(
             @RequestParam Long sellerId,
             @PathVariable Long salePostId,
@@ -101,7 +101,7 @@ public class OrderController {
         );
     }
 
-    @PutMapping("/orders/{orderId}/cancel")
+    @PatchMapping("/orders/{orderId}/cancel")
     public ResponseEntity<ApiResponse<OrderStatusChangeResponse>> cancelOrderByBuyer(
             @RequestParam Long buyerId,
             @PathVariable Long orderId
