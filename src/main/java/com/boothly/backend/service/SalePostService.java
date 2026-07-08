@@ -74,67 +74,6 @@ public class SalePostService {
         return new SalePostCreateResponse(savedSalePost.getId());
     }
 
-    private void validateSalePeriod(SalePostCreateRequest request) {
-        if (request.getEndAt() != null
-                && request.getEndAt().isBefore(request.getStartAt())) {
-            throw new IllegalArgumentException(
-                    "판매 종료 시각은 판매 시작 시각보다 빠를 수 없습니다."
-            );
-        }
-    }
-
-    /* 상품 옵션 저장 메서드 */
-    private void saveProductOptions(
-            SalePost salePost,
-            List<ProductOptionCreateRequest> requests
-    ) {
-        if (requests == null || requests.isEmpty()) {
-            return;
-        }
-
-        List<ProductOption> productOptions = requests.stream()
-                .map(request -> ProductOption.builder()
-                        .salePost(salePost)
-                        .active(true)
-                        .displayOrder(request.getDisplayOrder())
-                        .name(request.getName())
-                        .description(request.getDescription())
-                        .imageUrl(request.getImageUrl())
-                        .price(request.getPrice())
-                        .cost(request.getCost())
-                        .stockQuantity(request.getStockQuantity())
-                        .maxQuantityPerOrder(
-                                request.getMaxQuantityPerOrder()
-                        )
-                        .build())
-                .toList();
-
-        productOptionRepository.saveAll(productOptions);
-    }
-
-    /* 배송 방법 저장 메서드 */
-    private void saveDeliveryMethods(
-            SalePost salePost,
-            List<DeliveryMethodCreateRequest> requests
-    ) {
-        if (requests == null || requests.isEmpty()) {
-            return;
-        }
-
-        List<DeliveryMethod> deliveryMethods = requests.stream()
-                .map(request -> DeliveryMethod.builder()
-                        .salePost(salePost)
-                        .methodName(request.getMethodName())
-                        .deliveryType(request.getDeliveryType())
-                        .deliveryFee(request.getDeliveryFee())
-                        .active(true)
-                        .build())
-                .toList();
-
-        deliveryMethodRepository.saveAll(deliveryMethods);
-    }
-
-
     public Page<SalePostListResponse> findOpenSalePosts(
             String keyword,
             Pageable pageable
@@ -202,6 +141,66 @@ public class SalePostService {
                     .findByIdAndUser_Id(salePostId, sellerId)
                     .orElseThrow(() -> new SalePostNotFoundException(salePostId))
         );
+    }
+
+    private void validateSalePeriod(SalePostCreateRequest request) {
+        if (request.getEndAt() != null
+                && request.getEndAt().isBefore(request.getStartAt())) {
+            throw new IllegalArgumentException(
+                    "판매 종료 시각은 판매 시작 시각보다 빠를 수 없습니다."
+            );
+        }
+    }
+
+    /* 상품 옵션 저장 메서드 */
+    private void saveProductOptions(
+            SalePost salePost,
+            List<ProductOptionCreateRequest> requests
+    ) {
+        if (requests == null || requests.isEmpty()) {
+            return;
+        }
+
+        List<ProductOption> productOptions = requests.stream()
+                .map(request -> ProductOption.builder()
+                        .salePost(salePost)
+                        .active(true)
+                        .displayOrder(request.getDisplayOrder())
+                        .name(request.getName())
+                        .description(request.getDescription())
+                        .imageUrl(request.getImageUrl())
+                        .price(request.getPrice())
+                        .cost(request.getCost())
+                        .stockQuantity(request.getStockQuantity())
+                        .maxQuantityPerOrder(
+                                request.getMaxQuantityPerOrder()
+                        )
+                        .build())
+                .toList();
+
+        productOptionRepository.saveAll(productOptions);
+    }
+
+    /* 배송 방법 저장 메서드 */
+    private void saveDeliveryMethods(
+            SalePost salePost,
+            List<DeliveryMethodCreateRequest> requests
+    ) {
+        if (requests == null || requests.isEmpty()) {
+            return;
+        }
+
+        List<DeliveryMethod> deliveryMethods = requests.stream()
+                .map(request -> DeliveryMethod.builder()
+                        .salePost(salePost)
+                        .methodName(request.getMethodName())
+                        .deliveryType(request.getDeliveryType())
+                        .deliveryFee(request.getDeliveryFee())
+                        .active(true)
+                        .build())
+                .toList();
+
+        deliveryMethodRepository.saveAll(deliveryMethods);
     }
 
     private void validateActiveOrders(Long salePostId){
