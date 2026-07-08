@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ProductOptionRepository extends JpaRepository<ProductOption, Long> {
-    List<ProductOption> findAllBySalePostIdOrderByDisplayOrder(Long salePostId);
+    List<ProductOption> findAllBySalePost_IdAndActiveTrueOrderByDisplayOrder(Long salePostId);
     List<ProductOption> findAllBySalePost_IdAndIdIn(Long salePostId, Collection<Long> productOptionIds);
 
     @Modifying(flushAutomatically = true)

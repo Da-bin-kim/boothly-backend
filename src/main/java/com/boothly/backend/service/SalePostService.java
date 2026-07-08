@@ -18,6 +18,8 @@ import com.boothly.backend.dto.salepost.create.SalePostCreateResponse;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
+import com.boothly.backend.dto.salepost.update.SalePostUpdateFormResponse;
+import com.boothly.backend.dto.salepost.update.UpdateSalePostRequest;
 import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -94,12 +96,12 @@ public class SalePostService {
                 throw new SalePostNotFoundException(salePostId);
         }
 
-        List<ProductOption> productOptions = productOptionRepository.findAllBySalePostIdOrderByDisplayOrder(salePostId);
+        List<ProductOption> productOptions = productOptionRepository.findAllBySalePost_IdAndActiveTrueOrderByDisplayOrder(salePostId);
         if(productOptions.isEmpty()){
             throw new InvalidSalePostStateException(salePostId, "등록된 상품 옵션이 없습니다.");
         }
 
-        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePostIdOrderByIdDesc(salePostId);
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePost_IdAndActiveTrueOrderByIdDesc(salePostId);
         if(deliveryMethods.isEmpty()){
             throw new InvalidSalePostStateException(salePostId, "등록된 배송 옵션이 없습니다.");
         }
@@ -140,6 +142,20 @@ public class SalePostService {
             salePostRepository
                     .findByIdAndUser_Id(salePostId, sellerId)
                     .orElseThrow(() -> new SalePostNotFoundException(salePostId))
+        );
+    }
+
+    public SalePostUpdateFormResponse getSalePostForUpdate(
+            Long sellerId,
+            Long salePostId){
+        SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
+                .orElseThrow(()->new SalePostNotFoundException(salePostId));
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePost_IdAndActiveTrueOrderByIdDesc(salePostId);
+        List<ProductOption> productOptions = productOptionRepository.findAllBySalePost_IdAndActiveTrueOrderByDisplayOrder(salePostId);
+        boolean hasOrder = orderRepository.existsBySalePost_Id(salePostId);
+
+        return SalePostUpdateFormResponse.from(
+                salePost, deliveryMethods, productOptions, hasOrder
         );
     }
 

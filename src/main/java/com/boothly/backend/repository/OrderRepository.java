@@ -52,4 +52,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Long salePostId,
             List <OrderStatus> orderStatusList
     );
+    boolean existsBySalePost_Id(Long salePostId);
 }

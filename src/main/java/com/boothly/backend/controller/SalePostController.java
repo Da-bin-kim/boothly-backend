@@ -10,6 +10,7 @@ import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.create.SalePostCreateRequest;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
+import com.boothly.backend.dto.salepost.update.SalePostUpdateFormResponse;
 import com.boothly.backend.service.SalePostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -108,6 +109,16 @@ public class SalePostController {
     ){
         return ResponseEntity.ok(ApiResponse.success(
                 salePostService.findMySalePost(sellerId, salePostId)
+        ));
+    }
+
+    @GetMapping("/seller/sale-posts/{salePostId}/update")
+    public ResponseEntity<ApiResponse<SalePostUpdateFormResponse>> getSalePostUpdateForm(
+            @RequestParam Long sellerId,
+            @PathVariable Long salePostId
+    ){
+        return ResponseEntity.ok(ApiResponse.success(
+                salePostService.getSalePostForUpdate(sellerId, salePostId)
         ));
     }
 }
