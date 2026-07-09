@@ -1,8 +1,6 @@
 package com.boothly.backend.service;
 
-import com.boothly.backend.common.exception.salepost.InvalidSalePostStateException;
-import com.boothly.backend.common.exception.salepost.SalePostHasActiveOrdersException;
-import com.boothly.backend.common.exception.salepost.SalePostNotFoundException;
+import com.boothly.backend.common.exception.salepost.*;
 import com.boothly.backend.common.exception.user.UserNotFoundException;
 import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.domain.enums.SalePostStatus;
@@ -18,8 +16,10 @@ import com.boothly.backend.dto.salepost.create.SalePostCreateResponse;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
+import com.boothly.backend.dto.salepost.update.DeliveryMethodUpdateRequest;
+import com.boothly.backend.dto.salepost.update.ProductOptionUpdateRequest;
 import com.boothly.backend.dto.salepost.update.SalePostUpdateFormResponse;
-import com.boothly.backend.dto.salepost.update.UpdateSalePostRequest;
+import com.boothly.backend.dto.salepost.update.SalePostUpdateRequest;
 import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -159,6 +163,26 @@ public class SalePostService {
         );
     }
 
+    //TODO 판매글 수정 기능
+    @Transactional
+    public void updateSalePost(
+            Long sellerId,
+            Long salePostId,
+            SalePostUpdateRequest request){
+
+        SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
+                .orElseThrow(()->new SalePostNotFoundException(salePostId));
+
+        List<Long> deliveryMethodIds = validateAndExtractDeliveryMethodIds(request.getDeliveryMethods());
+        Map<Long, DeliveryMethod> deliveryMethods = getDeliveryMethodsByIds(salePostId, deliveryMethodIds);
+
+        List<Long> productOptionIds = validateAndExtractProductOptionIds(request.getProductOptions());
+        Map<Long, ProductOption> productOptions = getProductOptionsByIds(salePostId, productOptionIds);
+
+        boolean hasExistingOrders = orderRepository.existsBySalePost_Id(salePostId);
+
+    }
+
     private void validateSalePeriod(SalePostCreateRequest request) {
         if (request.getEndAt() != null
                 && request.getEndAt().isBefore(request.getStartAt())) {
@@ -228,5 +252,48 @@ public class SalePostService {
         if (existsActiveOrders) {
             throw new SalePostHasActiveOrdersException(salePostId);
         }
+    }
+
+    private List<Long> validateAndExtractDeliveryMethodIds(List<DeliveryMethodUpdateRequest> request) {
+        List<Long> deliveryMethodIds = request.stream()
+                .map(DeliveryMethodUpdateRequest::getId)
+                .toList();
+        Set<Long> uniqueIds = new HashSet<>(deliveryMethodIds);
+
+        if (deliveryMethodIds.size() != uniqueIds.size()) {
+            throw new DuplicateDeliveryMethodIdException();
+        }
+        return deliveryMethodIds;
+    }
+
+    private Map<Long,DeliveryMethod> getDeliveryMethodsByIds(Long salePostId, List<Long> deliveryMethodIds){
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository
+                .findAllBySalePost_IdAndActiveTrueAndIdIn(salePostId, deliveryMethodIds);
+        if (deliveryMethodIds.size() != deliveryMethods.size()) {
+            throw new DeliveryMethodNotFoundException();
+        }
+        return deliveryMethods.stream()
+                .collect(Collectors.toMap(DeliveryMethod::getId, (deliveryMethod) -> deliveryMethod));
+    }
+
+    private List<Long> validateAndExtractProductOptionIds(List<ProductOptionUpdateRequest> request) {
+        List<Long> productOptionIds = request.stream()
+                .map(ProductOptionUpdateRequest::getId)
+                .toList();
+        Set<Long> uniqueIds = new HashSet<>(productOptionIds);
+        if(productOptionIds.size() != uniqueIds.size()) {
+            throw new DuplicateProductOptionException();
+        }
+        return productOptionIds;
+    }
+
+    private Map<Long,ProductOption> getProductOptionsByIds(Long salePostId, List<Long> productOptionIds) {
+        List<ProductOption> productOptions = productOptionRepository
+                .findAllBySalePost_IdAndActiveTrueAndIdIn(salePostId, productOptionIds);
+        if(productOptionIds.size() != productOptions.size()) {
+            throw new ProductOptionNotFoundException();
+        }
+        return productOptions.stream()
+                .collect(Collectors.toMap(ProductOption::getId, productOption->productOption));
     }
 }

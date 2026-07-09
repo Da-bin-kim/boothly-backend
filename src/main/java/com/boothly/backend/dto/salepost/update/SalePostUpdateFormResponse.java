@@ -24,7 +24,7 @@ public class SalePostUpdateFormResponse {
     private final String bankName;
     private final String accountNumber;
     private final String accountHolder;
-    private final List<DeliveryMethodFormResponse> deliveryMethods;
+    private final List<DeliveryMethodUpdateFormResponse> deliveryMethods;
     private final List<ProductOptionUpdateFormResponse> productOptions;
     private final boolean hasOrder;
 
@@ -35,9 +35,9 @@ public class SalePostUpdateFormResponse {
             boolean hasOrder
     ){
 
-        List<DeliveryMethodFormResponse> deliveryMethodFormResponses =
+        List<DeliveryMethodUpdateFormResponse> deliveryMethodFormResponses =
                 deliveryMethods.stream()
-                    .map(DeliveryMethodFormResponse::from)
+                    .map(DeliveryMethodUpdateFormResponse::from)
                     .collect(Collectors.toList());
 
         List<ProductOptionUpdateFormResponse> productOptionUpdateFormResponses =

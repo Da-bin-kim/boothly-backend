@@ -7,14 +7,14 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class DeliveryMethodFormResponse {
+public class DeliveryMethodUpdateFormResponse {
     private final Long id;
     private final String methodName;
     private final DeliveryType deliveryType;
     private final int deliveryFee;
 
-    public static DeliveryMethodFormResponse from(DeliveryMethod deliveryMethod) {
-        return DeliveryMethodFormResponse.builder()
+    public static DeliveryMethodUpdateFormResponse from(DeliveryMethod deliveryMethod) {
+        return DeliveryMethodUpdateFormResponse.builder()
                 .id(deliveryMethod.getId())
                 .methodName(deliveryMethod.getMethodName())
                 .deliveryType(deliveryMethod.getDeliveryType())

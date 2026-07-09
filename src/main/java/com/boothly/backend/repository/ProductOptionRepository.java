@@ -11,6 +11,7 @@ import java.util.List;
 public interface ProductOptionRepository extends JpaRepository<ProductOption, Long> {
     List<ProductOption> findAllBySalePost_IdAndActiveTrueOrderByDisplayOrder(Long salePostId);
     List<ProductOption> findAllBySalePost_IdAndIdIn(Long salePostId, Collection<Long> productOptionIds);
+    List<ProductOption> findAllBySalePost_IdAndActiveTrueAndIdIn(Long salePostId, Collection<Long> productOptionIds);
 
     @Modifying(flushAutomatically = true)
     @Query("""

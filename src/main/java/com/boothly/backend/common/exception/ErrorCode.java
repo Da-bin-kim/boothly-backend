@@ -57,6 +57,11 @@ public enum ErrorCode {
             "SALE_POST_HAS_ACTIVE_ORDERS",
             "처리 중인 주문이 남아 있어 판매글을 숨길 수 없습니다."
     ),
+    DUPLICATE_DELIVERY_METHOD_ID(
+            HttpStatus.BAD_REQUEST,
+            "DUPLICATE_DELIVERY_METHOD_ID",
+            "배송 방법 ID는 중복될 수 없습니다."
+    ),
 
     // Order
     INVALID_SALE_POST_OPTION(

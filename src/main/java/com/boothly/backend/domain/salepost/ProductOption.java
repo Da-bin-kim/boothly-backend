@@ -2,7 +2,10 @@ package com.boothly.backend.domain.salepost;
 
 import com.boothly.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.*;
+
+import java.util.Objects;
 
 @Getter
 @Entity
@@ -53,4 +56,36 @@ public class ProductOption extends BaseTimeEntity {
 
     @Column(name = "max_quantity_per_order")
     private Integer maxQuantityPerOrder;
+
+    public void update(ProductOptionUpdateValues values, boolean hasExistingOrders){
+        if(hasExistingOrders){
+            validateOrderSensitiveFieldsUnchanged(values);
+        }else{
+            updateOrderSensitiveFields(values);
+        }
+        updateAlwaysEditableFields(values);
+    }
+
+    private void validateOrderSensitiveFieldsUnchanged(ProductOptionUpdateValues values){
+        if (!Objects.equals(displayOrder, values.displayOrder())
+        || !Objects.equals(name, values.name())
+        || !Objects.equals(price, values.price())
+        || !Objects.equals(cost, values.cost())
+        || !Objects.equals(maxQuantityPerOrder, values.maxQuantityPerOrder())
+        ) {
+            // 예외
+        }
+    }
+    private void updateOrderSensitiveFields(ProductOptionUpdateValues values){
+        displayOrder = values.displayOrder();
+        name = values.name();
+        price = values.price();
+        cost = values.cost();
+        maxQuantityPerOrder = values.maxQuantityPerOrder();
+    }
+    private void updateAlwaysEditableFields(ProductOptionUpdateValues values){
+        description = values.description();
+        imageUrl = values.imageUrl();
+        stockQuantity = values.stockQuantity();
+    }
 }

@@ -10,4 +10,10 @@ public class DeliveryMethodNotFoundException extends BusinessException {
                 + " salePostId=" + salePostId
                 + "Delivery Method " + deliveryMethodId);
     }
+
+    public DeliveryMethodNotFoundException() {
+        super(ErrorCode.DELIVERY_METHOD_NOT_FOUND
+                ,"일치하는 배송 옵션을 찾을 수 없습니다."
+        );
+    }
 }

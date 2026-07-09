@@ -10,4 +10,9 @@ public class ProductOptionNotFoundException extends BusinessException {
                 + " salePostId=" + salePostId
                 + ", productOptionId=" + productOptionId);
     }
+    public ProductOptionNotFoundException() {
+        super(ErrorCode.PRODUCT_OPTION_NOT_FOUND
+                , "상품 옵션을 찾을 수 없습니다."
+        );
+    }
 }

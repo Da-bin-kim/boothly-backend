@@ -5,6 +5,8 @@ import com.boothly.backend.domain.enums.DeliveryType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Builder
 @Getter
 @Entity
@@ -32,4 +34,27 @@ public class DeliveryMethod extends BaseTimeEntity {
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
+
+    public void update(DeliveryMethodUpdateValues values, boolean hasExistingOrders) {
+        if(hasExistingOrders){
+            validateOrderSensitiveFieldsUnchanged(values);
+        }else{
+            updateOrderSensitiveFields(values);
+        }
+    }
+    private void validateOrderSensitiveFieldsUnchanged(DeliveryMethodUpdateValues values){
+        if(!Objects.equals(methodName, values.methodName())
+        || !Objects.equals(deliveryType, values.deliveryType())
+        || deliveryFee != values.deliveryFee()){
+            //예외
+        }
+    }
+    private void updateOrderSensitiveFields(DeliveryMethodUpdateValues values){
+        methodName = values.methodName();
+        deliveryType = values.deliveryType();
+        deliveryFee = values.deliveryFee();
+    }
+    private void updateAlwaysEditableFields(DeliveryMethodUpdateValues values){
+        //active 활성화, 비활성화 가능하게 할지 고민
+    }
 }
