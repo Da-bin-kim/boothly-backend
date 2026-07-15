@@ -8,5 +8,7 @@ public record ProductOptionUpdateValues (
         int price,
         Integer cost,
         int stockQuantity,
-        Integer maxQuantityPerOrder
+        Integer maxQuantityPerOrder,
+        boolean isActive,
+        boolean isDeleted
 ){}

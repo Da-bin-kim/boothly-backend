@@ -16,6 +16,7 @@ public class ProductOptionUpdateFormResponse {
     private final Integer cost;
     private final int stockQuantity;
     private final Integer maxQuantityPerOrder;
+    private final boolean isActive;
 
     public static ProductOptionUpdateFormResponse from(ProductOption productOption) {
         return ProductOptionUpdateFormResponse.builder()
@@ -28,6 +29,7 @@ public class ProductOptionUpdateFormResponse {
                 .cost(productOption.getCost())
                 .stockQuantity(productOption.getStockQuantity())
                 .maxQuantityPerOrder(productOption.getMaxQuantityPerOrder())
+                .isActive(productOption.isActive())
                 .build();
     }
 }

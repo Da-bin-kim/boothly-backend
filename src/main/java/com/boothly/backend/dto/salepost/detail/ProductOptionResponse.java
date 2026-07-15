@@ -4,10 +4,11 @@ import com.boothly.backend.domain.salepost.ProductOption;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 public class ProductOptionResponse {
     private final Long id;
-    private final boolean active;
     private final int displayOrder;
     private final String name;
     private final String description;
@@ -15,11 +16,13 @@ public class ProductOptionResponse {
     private final int price;
     private final int stockQuantity;
     private final Integer maxQuantityPerOrder;
+    private final boolean active;
+    private final LocalDateTime deletedAt;
+
 
     public static ProductOptionResponse from(ProductOption option) {
         return ProductOptionResponse.builder()
                 .id(option.getId())
-                .active(option.isActive())
                 .displayOrder(option.getDisplayOrder())
                 .name(option.getName())
                 .description(option.getDescription())
@@ -27,11 +30,13 @@ public class ProductOptionResponse {
                 .price(option.getPrice())
                 .stockQuantity(option.getStockQuantity())
                 .maxQuantityPerOrder(option.getMaxQuantityPerOrder())
+                .active(option.isActive())
+                .deletedAt(option.getDeletedAt())
                 .build();
     }
 
     @Builder
-    private ProductOptionResponse(Long id, boolean active, int displayOrder, String name, String description, String imageUrl, int price, int stockQuantity, Integer maxQuantityPerOrder) {
+    private ProductOptionResponse(Long id, boolean active, int displayOrder, String name, String description, String imageUrl, int price, int stockQuantity, Integer maxQuantityPerOrder, LocalDateTime deletedAt) {
         this.id = id;
         this.active = active;
         this.displayOrder = displayOrder;
@@ -41,5 +46,6 @@ public class ProductOptionResponse {
         this.price = price;
         this.stockQuantity = stockQuantity;
         this.maxQuantityPerOrder = maxQuantityPerOrder;
+        this.deletedAt = deletedAt;
     }
 }

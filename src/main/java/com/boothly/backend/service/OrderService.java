@@ -182,7 +182,7 @@ public class OrderService {
         }
 
         // 2. 존재하지 않거나 다른 게시글의 옵션인지 검증
-        List<ProductOption> matchedProductOptions = productOptionRepository.findAllBySalePost_IdAndIdIn(salePostId, uniqueOptionIds);
+        List<ProductOption> matchedProductOptions = productOptionRepository.findAllBySalePost_IdAndDeletedAtIsNullAndIdIn(salePostId, uniqueOptionIds);
 
         if (matchedProductOptions.size() != uniqueOptionIds.size()) {
             throw new InvalidSalePostOptionException(salePostId, null);

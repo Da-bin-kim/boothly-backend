@@ -108,7 +108,7 @@ public class SalePostController {
             @PathVariable Long salePostId
     ){
         return ResponseEntity.ok(ApiResponse.success(
-                salePostService.findMySalePost(sellerId, salePostId)
+                salePostService.findMySalePostOverview(sellerId, salePostId)
         ));
     }
 
@@ -118,7 +118,7 @@ public class SalePostController {
             @PathVariable Long salePostId
     ){
         return ResponseEntity.ok(ApiResponse.success(
-                salePostService.getSalePostForUpdate(sellerId, salePostId)
+                salePostService.findSalePostForUpdate(sellerId, salePostId)
         ));
     }
 }

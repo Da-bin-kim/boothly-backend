@@ -4,9 +4,7 @@ import com.boothly.backend.common.exception.salepost.*;
 import com.boothly.backend.common.exception.user.UserNotFoundException;
 import com.boothly.backend.domain.enums.OrderStatus;
 import com.boothly.backend.domain.enums.SalePostStatus;
-import com.boothly.backend.domain.salepost.DeliveryMethod;
-import com.boothly.backend.domain.salepost.ProductOption;
-import com.boothly.backend.domain.salepost.SalePost;
+import com.boothly.backend.domain.salepost.*;
 import com.boothly.backend.domain.user.User;
 import com.boothly.backend.dto.salepost.SalePostStatusChangeResponse;
 import com.boothly.backend.dto.salepost.create.DeliveryMethodCreateRequest;
@@ -42,6 +40,9 @@ public class SalePostService {
     private final ProductOptionRepository productOptionRepository;
     private final DeliveryMethodRepository deliveryMethodRepository;
     private final OrderRepository orderRepository;
+
+    private static final List<OrderStatus> ONGOING_ORDER_STATUSES =
+            List.of(OrderStatus.REQUESTED, OrderStatus.CONFIRMED);
 
     /**
      * 판매글을 생성한다.
@@ -100,7 +101,7 @@ public class SalePostService {
                 throw new SalePostNotFoundException(salePostId);
         }
 
-        List<ProductOption> productOptions = productOptionRepository.findAllBySalePost_IdAndActiveTrueOrderByDisplayOrder(salePostId);
+        List<ProductOption> productOptions = productOptionRepository.findAllBySalePost_IdAndDeletedAtIsNullOrderByDisplayOrder(salePostId);
         if(productOptions.isEmpty()){
             throw new InvalidSalePostStateException(salePostId, "등록된 상품 옵션이 없습니다.");
         }
@@ -122,24 +123,7 @@ public class SalePostService {
                 .map(MySalePostOverviewResponse::from);
     }
 
-    @Transactional
-    public SalePostStatusChangeResponse changeSalePostStatus(
-            Long sellerId,
-            Long salePostId,
-            SalePostStatus salePostStatus) {
-        SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
-                .orElseThrow(() -> new SalePostNotFoundException(salePostId));
-
-        if(salePost.getSaleStatus() == SalePostStatus.CLOSED
-                && salePostStatus == SalePostStatus.HIDDEN){
-            validateActiveOrders(salePostId);
-        }
-        salePost.changeStatus(salePostStatus);
-
-        return SalePostStatusChangeResponse.from(salePost);
-    }
-
-    public MySalePostOverviewResponse findMySalePost(
+    public MySalePostOverviewResponse findMySalePostOverview(
             Long sellerId,
             Long salePostId) {
         return MySalePostOverviewResponse.from(
@@ -149,7 +133,7 @@ public class SalePostService {
         );
     }
 
-    public SalePostUpdateFormResponse getSalePostForUpdate(
+    public SalePostUpdateFormResponse findSalePostForUpdate(
             Long sellerId,
             Long salePostId){
         SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
@@ -163,23 +147,44 @@ public class SalePostService {
         );
     }
 
-    //TODO 판매글 수정 기능
     @Transactional
-    public void updateSalePost(
+    public SalePostStatusChangeResponse changeSalePostStatus(
             Long sellerId,
             Long salePostId,
-            SalePostUpdateRequest request){
-
+            SalePostStatus salePostStatus) {
         SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
+                .orElseThrow(() -> new SalePostNotFoundException(salePostId));
+
+        if(salePost.getSaleStatus() == SalePostStatus.CLOSED
+                && salePostStatus == SalePostStatus.HIDDEN){
+            validateNoOngoingOrders(salePostId);
+        }
+        salePost.changeStatus(salePostStatus);
+
+        return SalePostStatusChangeResponse.from(salePost);
+    }
+
+    //TODO 판매글 수정 기능
+    @Transactional
+    public void updateSalePostDetail(
+            Long sellerId,
+            Long salePostId,
+            SalePostUpdateRequest updateRequest){
+
+        SalePost salePost = salePostRepository.findForUpdateByIdAndUserId(salePostId, sellerId)
                 .orElseThrow(()->new SalePostNotFoundException(salePostId));
 
-        List<Long> deliveryMethodIds = validateAndExtractDeliveryMethodIds(request.getDeliveryMethods());
-        Map<Long, DeliveryMethod> deliveryMethods = getDeliveryMethodsByIds(salePostId, deliveryMethodIds);
-
-        List<Long> productOptionIds = validateAndExtractProductOptionIds(request.getProductOptions());
-        Map<Long, ProductOption> productOptions = getProductOptionsByIds(salePostId, productOptionIds);
-
         boolean hasExistingOrders = orderRepository.existsBySalePost_Id(salePostId);
+
+        List<ProductOptionUpdateRequest> productOptionRequests =
+                updateRequest.getProductOptions();
+
+        List<Long> productOptionIds = updateRequest.getProductOptions().stream()
+                .map(ProductOptionUpdateRequest::getId)
+                .toList();
+
+        validateProductOptionIds(productOptionIds);
+        updateProductOptions(salePostId, productOptionRequests, productOptionIds, hasExistingOrders);
 
     }
 
@@ -189,6 +194,20 @@ public class SalePostService {
             throw new IllegalArgumentException(
                     "판매 종료 시각은 판매 시작 시각보다 빠를 수 없습니다."
             );
+        }
+    }
+
+    private void validateNoOngoingOrders(Long salePostId){
+        boolean hasOngoingOrders = orderRepository.existsBySalePost_IdAndOrderStatusIn(salePostId, ONGOING_ORDER_STATUSES);
+
+        if (hasOngoingOrders) {
+            throw new SalePostHasOngoingOrdersException(salePostId);
+        }
+    }
+    private void validateProductOptionIds(List<Long> productOptionIds) {
+        Set<Long> uniqueIds = new HashSet<>(productOptionIds);
+        if(productOptionIds.size() != uniqueIds.size()) {
+            throw new DuplicateProductOptionException();
         }
     }
 
@@ -243,27 +262,13 @@ public class SalePostService {
         deliveryMethodRepository.saveAll(deliveryMethods);
     }
 
-    private void validateActiveOrders(Long salePostId){
-        boolean existsActiveOrders = orderRepository.existsBySalePost_IdAndOrderStatusIn(
-                        salePostId,
-                        List.of(OrderStatus.REQUESTED, OrderStatus.CONFIRMED)
-                );
+    private void updateProductOptions(Long salePostId, List<ProductOptionUpdateRequest> updateRequests, List<Long> productOptionIds, boolean hasExistingOrders) {
+        Map<Long, ProductOption> productOptions = getProductOptionsByIds(salePostId, productOptionIds);
 
-        if (existsActiveOrders) {
-            throw new SalePostHasActiveOrdersException(salePostId);
-        }
-    }
-
-    private List<Long> validateAndExtractDeliveryMethodIds(List<DeliveryMethodUpdateRequest> request) {
-        List<Long> deliveryMethodIds = request.stream()
-                .map(DeliveryMethodUpdateRequest::getId)
-                .toList();
-        Set<Long> uniqueIds = new HashSet<>(deliveryMethodIds);
-
-        if (deliveryMethodIds.size() != uniqueIds.size()) {
-            throw new DuplicateDeliveryMethodIdException();
-        }
-        return deliveryMethodIds;
+        updateRequests.forEach(request -> {
+            ProductOption productOption = productOptions.get(request.getId());
+            productOption.update(request.toUpdateValues(), hasExistingOrders);
+        });
     }
 
     private Map<Long,DeliveryMethod> getDeliveryMethodsByIds(Long salePostId, List<Long> deliveryMethodIds){
@@ -276,20 +281,9 @@ public class SalePostService {
                 .collect(Collectors.toMap(DeliveryMethod::getId, (deliveryMethod) -> deliveryMethod));
     }
 
-    private List<Long> validateAndExtractProductOptionIds(List<ProductOptionUpdateRequest> request) {
-        List<Long> productOptionIds = request.stream()
-                .map(ProductOptionUpdateRequest::getId)
-                .toList();
-        Set<Long> uniqueIds = new HashSet<>(productOptionIds);
-        if(productOptionIds.size() != uniqueIds.size()) {
-            throw new DuplicateProductOptionException();
-        }
-        return productOptionIds;
-    }
-
     private Map<Long,ProductOption> getProductOptionsByIds(Long salePostId, List<Long> productOptionIds) {
         List<ProductOption> productOptions = productOptionRepository
-                .findAllBySalePost_IdAndActiveTrueAndIdIn(salePostId, productOptionIds);
+                .findAllBySalePost_IdAndDeletedAtIsNullAndIdIn(salePostId, productOptionIds);
         if(productOptionIds.size() != productOptions.size()) {
             throw new ProductOptionNotFoundException();
         }

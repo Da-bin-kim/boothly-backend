@@ -52,15 +52,35 @@ public enum ErrorCode {
             "INVALID_SALE_STATUS_TRANSITION",
             "허용되지 않은 판매 상태 변경입니다."
     ),
-    SALE_POST_HAS_ACTIVE_ORDERS(
+    SALE_POST_HAS_ONGOING_ORDERS(
             HttpStatus.CONFLICT,
-            "SALE_POST_HAS_ACTIVE_ORDERS",
+            "SALE_POST_HAS_ONGOING_ORDERS",
             "처리 중인 주문이 남아 있어 판매글을 숨길 수 없습니다."
     ),
     DUPLICATE_DELIVERY_METHOD_ID(
             HttpStatus.BAD_REQUEST,
             "DUPLICATE_DELIVERY_METHOD_ID",
             "배송 방법 ID는 중복될 수 없습니다."
+    ),
+    PRODUCT_OPTION_ALREADY_DELETED(
+            HttpStatus.NOT_FOUND,
+            "PRODUCT_OPTION_ALREADY_DELETED",
+            "삭제된 옵션을 처리할 수 없습니다."
+    ),
+    PRODUCT_OPTION_EDITABLE_FIELDS_CHANGE_NOT_ALLOWED(
+            HttpStatus.CONFLICT,
+            "PRODUCT_OPTION_EDITABLE_FIELDS_CHANGE_NOT_ALLOWED",
+            "옵션 정보 수정을 처리할 수 없습니다."
+    ),
+    PRODUCT_OPTION_DELETE_WITH_ACTIVE_CHANGE_NOT_ALLOWED(
+            HttpStatus.BAD_REQUEST,
+            "PRODUCT_OPTION_DELETE_WITH_ACTIVE_CHANGE_NOT_ALLOWED",
+            "삭제와 활성 상태 변경을 동시에 처리할 수 없습니다."
+    ),
+    PRODUCT_OPTION_DELETE_WITH_ORDERS_NOT_ALLOWED(
+            HttpStatus.CONFLICT,
+            "PRODUCT_OPTION_DELETE_WITH_ORDERS_NOT_ALLOWED",
+            "주문이 존재하는 옵션은 삭제할 수 없습니다."
     ),
 
     // Order

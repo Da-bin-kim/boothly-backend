@@ -37,16 +37,24 @@ public class ProductOptionUpdateRequest {
     @Positive
     private Integer maxQuantityPerOrder;
 
+    @NotNull
+    private Boolean isActive;
+
+    @NotNull
+    private Boolean isDeleted;
+
     public ProductOptionUpdateValues toUpdateValues() {
         return new ProductOptionUpdateValues(
                 displayOrder,
                 name,
-                description, //수정가능
-                imageUrl, //수정가능
+                description,
+                imageUrl,
                 price,
                 cost,
-                stockQuantity,//수정가능
-                maxQuantityPerOrder
+                stockQuantity,
+                maxQuantityPerOrder,
+                isActive,
+                isDeleted
         );
     }
 }
