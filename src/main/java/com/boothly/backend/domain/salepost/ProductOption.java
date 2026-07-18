@@ -57,49 +57,68 @@ public class ProductOption extends BaseTimeEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    private enum ProductOptionOperation {
+        UPDATE,
+        DEACTIVATE,
+        DELETE
+    }
+
     public void update(
             ProductOptionUpdateValues updateValues,
-            boolean hasExistingOrders){
+            boolean hasExistingOrders) {
+
         validateNotDeleted();
+        ProductOptionOperation operation = determineOperation(updateValues);
 
-        if (hasExistingOrders) {
-            updateWithExistingOrders(updateValues);
-        } else {
-            updateWithoutOrders(updateValues);
+        switch (operation) {
+            case DELETE -> delete(updateValues, hasExistingOrders);
+            case DEACTIVATE -> deactivate(updateValues);
+            case UPDATE -> updateNormally(updateValues, hasExistingOrders);
         }
     }
 
-
-    private void updateWithExistingOrders(ProductOptionUpdateValues updateValues) {
-        if (updateValues.isDeleted()) {
-            throw new ProductOptionException(ErrorCode.PRODUCT_OPTION_DELETE_WITH_ORDERS_NOT_ALLOWED, salePost.getId(), getId());
+    private ProductOptionOperation determineOperation (ProductOptionUpdateValues updateValues) {
+        if(updateValues.isDeleted()){
+            return ProductOptionOperation.DELETE;
         }
-
-        if (!updateValues.isActive()) {
-            validateOnlyActiveMayChange(updateValues);
-            changeActiveStatus(false);
-            return;
+        if(!updateValues.isActive()){
+            return ProductOptionOperation.DEACTIVATE;
         }
-
-        validateEditableFieldsUnchanged(updateValues);
-        updateStockQuantity(updateValues.stockQuantity());
-        changeActiveStatus(true);
+        return ProductOptionOperation.UPDATE;
     }
 
-    private void updateWithoutOrders(ProductOptionUpdateValues updateValues) {
-        if (updateValues.isDeleted()) {
-            validateOnlyDeletedChanged(updateValues);
-            softDelete();
-            return;
+    private void delete(
+            ProductOptionUpdateValues updateValues,
+            boolean hasExistingOrders){
+
+        if(hasExistingOrders){
+            throw new ProductOptionException(
+                    ErrorCode.PRODUCT_OPTION_DELETE_WITH_ORDERS_NOT_ALLOWED,
+                    salePost.getId(),
+                    getId()
+            );
         }
 
-        if (!updateValues.isActive()) {
-            validateOnlyActiveMayChange(updateValues);
-            changeActiveStatus(false);
-            return;
-        }
+        validateOnlyDeletedChanged(updateValues);
+        softDelete();
+    }
 
-        updateEditableFields(updateValues);
+    private void deactivate(
+            ProductOptionUpdateValues updateValues
+    ){
+        validateOnlyActiveMayChange(updateValues);
+        changeActiveStatus(false);
+    }
+
+    private void updateNormally(
+            ProductOptionUpdateValues updateValues,
+            boolean hasExistingOrders) {
+
+        if(hasExistingOrders) {
+            validateEditableFieldsUnchanged(updateValues);
+        }else {
+            updateEditableFields(updateValues);
+        }
         updateStockQuantity(updateValues.stockQuantity());
         changeActiveStatus(true);
     }
@@ -118,15 +137,15 @@ public class ProductOption extends BaseTimeEntity {
     }
 
     private void validateOnlyDeletedChanged(ProductOptionUpdateValues updateValues) {
-        validateEditableFieldsUnchanged(updateValues);
-        validateStockQuantityUnchanged(updateValues.stockQuantity());
-
         if (isActiveChanged(updateValues)) {
             throw new ProductOptionException(
                     ErrorCode.PRODUCT_OPTION_DELETE_WITH_ACTIVE_CHANGE_NOT_ALLOWED,
                     salePost.getId(),
                     getId());
         }
+
+        validateEditableFieldsUnchanged(updateValues);
+        validateStockQuantityUnchanged(updateValues.stockQuantity());
     }
 
     private void validateOnlyActiveMayChange(ProductOptionUpdateValues updateValues) {
