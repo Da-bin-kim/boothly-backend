@@ -82,6 +82,26 @@ public enum ErrorCode {
             "PRODUCT_OPTION_DELETE_WITH_ORDERS_NOT_ALLOWED",
             "주문이 존재하는 옵션은 삭제할 수 없습니다."
     ),
+    DELIVERY_METHOD_ALREADY_DELETED(
+            HttpStatus.NOT_FOUND,
+            "DELIVERY_METHOD_ALREADY_DELETED",
+            "삭제된 배송 방법을 처리할 수 없습니다."
+    ),
+    DELIVERY_METHOD_EDITABLE_FIELDS_CHANGE_NOT_ALLOWED(
+            HttpStatus.CONFLICT,
+            "DELIVERY_METHOD_EDITABLE_FIELDS_CHANGE_NOT_ALLOWED",
+            "배송 방법 수정을 처리할 수 없습니다."
+    ),
+    DELIVERY_METHOD_DELETE_WITH_ACTIVE_CHANGE_NOT_ALLOWED(
+            HttpStatus.BAD_REQUEST,
+            "DELIVERY_METHOD_DELETE_WITH_ACTIVE_CHANGE_NOT_ALLOWED",
+            "삭제와 활성 상태 변경을 동시에 처리할 수 없습니다."
+    ),
+    DELIVERY_METHOD_DELETE_WITH_ORDERS_NOT_ALLOWED(
+            HttpStatus.CONFLICT,
+            "DELIVERY_METHOD_DELETE_WITH_ORDERS_NOT_ALLOWED",
+            "주문이 존재하는 배송 방법은 삭제할 수 없습니다."
+    ),
 
     // Order
     INVALID_SALE_POST_OPTION(

@@ -12,6 +12,7 @@ public class DeliveryMethodUpdateFormResponse {
     private final String methodName;
     private final DeliveryType deliveryType;
     private final int deliveryFee;
+    private final boolean isActive;
 
     public static DeliveryMethodUpdateFormResponse from(DeliveryMethod deliveryMethod) {
         return DeliveryMethodUpdateFormResponse.builder()
@@ -19,6 +20,7 @@ public class DeliveryMethodUpdateFormResponse {
                 .methodName(deliveryMethod.getMethodName())
                 .deliveryType(deliveryMethod.getDeliveryType())
                 .deliveryFee(deliveryMethod.getDeliveryFee())
+                .isActive(deliveryMethod.isActive())
                 .build();
     };
 }

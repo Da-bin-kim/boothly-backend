@@ -213,7 +213,7 @@ public class OrderService {
 
     private DeliveryMethod validateAndGetDeliveryMethod(Long salePostId, Long deliveryMethodId) {
         DeliveryMethod deliveryMethod = deliveryMethodRepository
-                .findBySalePost_IdAndId(salePostId, deliveryMethodId)
+                .findBySalePost_IdAndDeletedAtIsNullAndId(salePostId, deliveryMethodId)
                 .orElseThrow(()->new DeliveryMethodNotFoundException(salePostId, deliveryMethodId));
         if(!deliveryMethod.isActive()){
             throw new InactiveDeliveryMethodException(salePostId, deliveryMethodId);

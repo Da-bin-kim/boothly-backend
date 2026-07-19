@@ -24,11 +24,19 @@ public class DeliveryMethodUpdateRequest {
     @PositiveOrZero
     private Integer deliveryFee;
 
+    @NotNull
+    private Boolean isActive;
+
+    @NotNull
+    private Boolean isDeleted;
+
     public DeliveryMethodUpdateValues toUpdateValues() {
         return new DeliveryMethodUpdateValues(
                 methodName,
                 deliveryType,
-                deliveryFee
+                deliveryFee,
+                isActive,
+                isDeleted
         );
     }
 }

@@ -5,6 +5,8 @@ import com.boothly.backend.domain.enums.DeliveryType;
 public record DeliveryMethodUpdateValues(
         String methodName,
         DeliveryType deliveryType,
-        int deliveryFee
+        int deliveryFee,
+        boolean isActive,
+        boolean isDeleted
 ) {
 }

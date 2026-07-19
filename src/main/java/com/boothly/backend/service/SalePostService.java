@@ -106,7 +106,7 @@ public class SalePostService {
             throw new InvalidSalePostStateException(salePostId, "등록된 상품 옵션이 없습니다.");
         }
 
-        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePost_IdAndActiveTrueOrderByIdDesc(salePostId);
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePost_IdAndDeletedAtIsNullOrderByIdDesc(salePostId);
         if(deliveryMethods.isEmpty()){
             throw new InvalidSalePostStateException(salePostId, "등록된 배송 옵션이 없습니다.");
         }
@@ -138,8 +138,8 @@ public class SalePostService {
             Long salePostId){
         SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
                 .orElseThrow(()->new SalePostNotFoundException(salePostId));
-        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePost_IdAndActiveTrueOrderByIdDesc(salePostId);
-        List<ProductOption> productOptions = productOptionRepository.findAllBySalePost_IdAndActiveTrueOrderByDisplayOrder(salePostId);
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findAllBySalePost_IdAndDeletedAtIsNullOrderByIdDesc(salePostId);
+        List<ProductOption> productOptions = productOptionRepository.findAllBySalePost_IdAndDeletedAtIsNullOrderByDisplayOrder(salePostId);
         boolean hasOrder = orderRepository.existsBySalePost_Id(salePostId);
 
         return SalePostUpdateFormResponse.from(
@@ -164,7 +164,7 @@ public class SalePostService {
         return SalePostStatusChangeResponse.from(salePost);
     }
 
-    //TODO 판매글 수정 기능
+    //TODO 호출 컨트롤러
     @Transactional
     public void updateSalePostDetail(
             Long sellerId,
@@ -174,18 +174,31 @@ public class SalePostService {
         SalePost salePost = salePostRepository.findForUpdateByIdAndUserId(salePostId, sellerId)
                 .orElseThrow(()->new SalePostNotFoundException(salePostId));
 
+        //TODO 게시글 내용 수정
+
         boolean hasExistingOrders = orderRepository.existsBySalePost_Id(salePostId);
 
+        //TODO 새로운 옵션 추가 동작 + 모두 비활성 or 삭제시 처리
         List<ProductOptionUpdateRequest> productOptionRequests =
                 updateRequest.getProductOptions();
 
-        List<Long> productOptionIds = updateRequest.getProductOptions().stream()
+        List<Long> productOptionIds = productOptionRequests.stream()
                 .map(ProductOptionUpdateRequest::getId)
                 .toList();
 
-        validateProductOptionIds(productOptionIds);
+        validateNoDuplicateProductOptionIds(productOptionIds);
         updateProductOptions(salePostId, productOptionRequests, productOptionIds, hasExistingOrders);
 
+        //TODO 새로운거 추가 + 모두 비활성 or 삭제시 처리
+        List<DeliveryMethodUpdateRequest> deliveryMethodUpdateRequests =
+                updateRequest.getDeliveryMethods();
+
+        List<Long> deliveryMethodIds = deliveryMethodUpdateRequests.stream()
+                .map(DeliveryMethodUpdateRequest::getId)
+                .toList();
+
+        validateNoDuplicateDeliveryMethodIds(deliveryMethodIds);
+        updateDeliveryMethods(salePostId, deliveryMethodUpdateRequests, deliveryMethodIds, hasExistingOrders);
     }
 
     private void validateSalePeriod(SalePostCreateRequest request) {
@@ -204,12 +217,21 @@ public class SalePostService {
             throw new SalePostHasOngoingOrdersException(salePostId);
         }
     }
-    private void validateProductOptionIds(List<Long> productOptionIds) {
+
+    private void validateNoDuplicateProductOptionIds(List<Long> productOptionIds) {
         Set<Long> uniqueIds = new HashSet<>(productOptionIds);
         if(productOptionIds.size() != uniqueIds.size()) {
             throw new DuplicateProductOptionException();
         }
     }
+
+    private void validateNoDuplicateDeliveryMethodIds(List<Long> deliveryMethodIds) {
+        Set<Long> uniqueIds = new HashSet<>(deliveryMethodIds);
+        if (deliveryMethodIds.size() != uniqueIds.size()) {
+            throw new DuplicateDeliveryMethodIdException();
+        }
+    }
+
 
     /* 상품 옵션 저장 메서드 */
     private void saveProductOptions(
@@ -262,7 +284,12 @@ public class SalePostService {
         deliveryMethodRepository.saveAll(deliveryMethods);
     }
 
-    private void updateProductOptions(Long salePostId, List<ProductOptionUpdateRequest> updateRequests, List<Long> productOptionIds, boolean hasExistingOrders) {
+    private void updateProductOptions(
+            Long salePostId,
+            List<ProductOptionUpdateRequest> updateRequests,
+            List<Long> productOptionIds,
+            boolean hasExistingOrders
+    ) {
         Map<Long, ProductOption> productOptions = getProductOptionsByIds(salePostId, productOptionIds);
 
         updateRequests.forEach(request -> {
@@ -271,14 +298,18 @@ public class SalePostService {
         });
     }
 
-    private Map<Long,DeliveryMethod> getDeliveryMethodsByIds(Long salePostId, List<Long> deliveryMethodIds){
-        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository
-                .findAllBySalePost_IdAndActiveTrueAndIdIn(salePostId, deliveryMethodIds);
-        if (deliveryMethodIds.size() != deliveryMethods.size()) {
-            throw new DeliveryMethodNotFoundException();
-        }
-        return deliveryMethods.stream()
-                .collect(Collectors.toMap(DeliveryMethod::getId, (deliveryMethod) -> deliveryMethod));
+    private void updateDeliveryMethods(
+            Long salePostId,
+            List<DeliveryMethodUpdateRequest> updateRequests,
+            List<Long> deliveryMethodIds,
+            boolean hasExistingOrders
+    ) {
+        Map<Long, DeliveryMethod> deliveryMethods = getDeliveryMethodsByIds(salePostId, deliveryMethodIds);
+
+        updateRequests.forEach(request -> {
+            DeliveryMethod deliveryMethod = deliveryMethods.get(request.getId());
+            deliveryMethod.update(request.toUpdateValues(), hasExistingOrders);
+        });
     }
 
     private Map<Long,ProductOption> getProductOptionsByIds(Long salePostId, List<Long> productOptionIds) {
@@ -289,5 +320,15 @@ public class SalePostService {
         }
         return productOptions.stream()
                 .collect(Collectors.toMap(ProductOption::getId, productOption->productOption));
+    }
+
+    private Map<Long,DeliveryMethod> getDeliveryMethodsByIds(Long salePostId, List<Long> deliveryMethodIds){
+        List<DeliveryMethod> deliveryMethods = deliveryMethodRepository
+                .findAllBySalePost_IdAndDeletedAtIsNullAndIdIn(salePostId, deliveryMethodIds);
+        if (deliveryMethodIds.size() != deliveryMethods.size()) {
+            throw new DeliveryMethodNotFoundException();
+        }
+        return deliveryMethods.stream()
+                .collect(Collectors.toMap(DeliveryMethod::getId, (deliveryMethod) -> deliveryMethod));
     }
 }
