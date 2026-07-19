@@ -10,4 +10,11 @@ public class ProductOptionException extends BusinessException {
                         + " salePostId=" + salePostId
                         + ", productOptionId=" + productOptionId);
     }
+
+    public ProductOptionException(ErrorCode errorCode, Long salePostId) {
+        super(errorCode,
+                errorCode.getMessage()
+                        + " salePostId=" + salePostId
+        );
+    }
 }

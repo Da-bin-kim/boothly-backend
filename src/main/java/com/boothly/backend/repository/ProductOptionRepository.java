@@ -11,6 +11,7 @@ import java.util.List;
 public interface ProductOptionRepository extends JpaRepository<ProductOption, Long> {
     List<ProductOption> findAllBySalePost_IdAndDeletedAtIsNullOrderByDisplayOrder(Long salePostId);
     List<ProductOption> findAllBySalePost_IdAndDeletedAtIsNullAndIdIn(Long salePostId, Collection<Long> productOptionIds);
+    boolean existsBySalePost_IdAndDeletedAtIsNullAndActiveIsTrue(Long salePostId);
 
     @Modifying(flushAutomatically = true)
     @Query("""

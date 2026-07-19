@@ -1,5 +1,6 @@
 package com.boothly.backend.service;
 
+import com.boothly.backend.common.exception.ErrorCode;
 import com.boothly.backend.common.exception.salepost.*;
 import com.boothly.backend.common.exception.user.UserNotFoundException;
 import com.boothly.backend.domain.enums.OrderStatus;
@@ -178,7 +179,7 @@ public class SalePostService {
 
         boolean hasExistingOrders = orderRepository.existsBySalePost_Id(salePostId);
 
-        //TODO 새로운 옵션 추가 동작 + 모두 비활성 or 삭제시 처리
+        //TODO 새로운 옵션 추가 동작
         List<ProductOptionUpdateRequest> productOptionRequests =
                 updateRequest.getProductOptions();
 
@@ -188,6 +189,7 @@ public class SalePostService {
 
         validateNoDuplicateProductOptionIds(productOptionIds);
         updateProductOptions(salePostId, productOptionRequests, productOptionIds, hasExistingOrders);
+        validateAtLeastOneActiveProductOption(salePostId);
 
         //TODO 새로운거 추가 + 모두 비활성 or 삭제시 처리
         List<DeliveryMethodUpdateRequest> deliveryMethodUpdateRequests =
@@ -229,6 +231,15 @@ public class SalePostService {
         Set<Long> uniqueIds = new HashSet<>(deliveryMethodIds);
         if (deliveryMethodIds.size() != uniqueIds.size()) {
             throw new DuplicateDeliveryMethodIdException();
+        }
+    }
+
+    private void validateAtLeastOneActiveProductOption(Long salePostId) {
+        if (!productOptionRepository.existsBySalePost_IdAndDeletedAtIsNullAndActiveIsTrue(salePostId)){
+            throw new ProductOptionException (
+                    ErrorCode.ACTIVE_PRODUCT_OPTION_REQUIRED,
+                    salePostId
+            );
         }
     }
 
