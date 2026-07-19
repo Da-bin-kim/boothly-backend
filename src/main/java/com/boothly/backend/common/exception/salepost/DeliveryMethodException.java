@@ -14,4 +14,13 @@ public class DeliveryMethodException extends BusinessException {
                     + " DeliveryMethodId=" + DeliveryMethodId
         );
     }
+
+    public DeliveryMethodException(
+            ErrorCode errorCode,
+            Long salePostId) {
+        super(errorCode,
+                errorCode.getMessage()
+                        + " salePostId=" + salePostId
+        );
+    }
 }

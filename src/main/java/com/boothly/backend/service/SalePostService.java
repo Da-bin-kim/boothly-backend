@@ -191,7 +191,7 @@ public class SalePostService {
         updateProductOptions(salePostId, productOptionRequests, productOptionIds, hasExistingOrders);
         validateAtLeastOneActiveProductOption(salePostId);
 
-        //TODO 새로운거 추가 + 모두 비활성 or 삭제시 처리
+        //TODO 새로운거 추가 동작
         List<DeliveryMethodUpdateRequest> deliveryMethodUpdateRequests =
                 updateRequest.getDeliveryMethods();
 
@@ -201,6 +201,7 @@ public class SalePostService {
 
         validateNoDuplicateDeliveryMethodIds(deliveryMethodIds);
         updateDeliveryMethods(salePostId, deliveryMethodUpdateRequests, deliveryMethodIds, hasExistingOrders);
+        validateAtLeastOneActiveDeliveryMethod(salePostId);
     }
 
     private void validateSalePeriod(SalePostCreateRequest request) {
@@ -237,7 +238,16 @@ public class SalePostService {
     private void validateAtLeastOneActiveProductOption(Long salePostId) {
         if (!productOptionRepository.existsBySalePost_IdAndDeletedAtIsNullAndActiveIsTrue(salePostId)){
             throw new ProductOptionException (
-                    ErrorCode.ACTIVE_PRODUCT_OPTION_REQUIRED,
+                    ErrorCode.PRODUCT_OPTION_AT_LEAST_ONE_ACTIVE_REQUIRED,
+                    salePostId
+            );
+        }
+    }
+
+    private void validateAtLeastOneActiveDeliveryMethod(Long salePostId) {
+        if (!deliveryMethodRepository.existsBySalePost_IdAndDeletedAtIsNullAndActiveIsTrue(salePostId)){
+            throw new DeliveryMethodException (
+                    ErrorCode.DELIVERY_METHOD_AT_LEAST_ONE_ACTIVE_REQUIRED,
                     salePostId
             );
         }

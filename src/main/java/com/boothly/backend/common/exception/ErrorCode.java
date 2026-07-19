@@ -102,10 +102,15 @@ public enum ErrorCode {
             "DELIVERY_METHOD_DELETE_WITH_ORDERS_NOT_ALLOWED",
             "주문이 존재하는 배송 방법은 삭제할 수 없습니다."
     ),
-    ACTIVE_PRODUCT_OPTION_REQUIRED(
+    PRODUCT_OPTION_AT_LEAST_ONE_ACTIVE_REQUIRED(
             HttpStatus.BAD_REQUEST,
-            "ACTIVE_PRODUCT_OPTION_REQUIRED",
+            "PRODUCT_OPTION_AT_LEAST_ONE_ACTIVE_REQUIRED",
             "활성화된 상품 옵션이 최소 1개 이상 필요합니다."
+    ),
+    DELIVERY_METHOD_AT_LEAST_ONE_ACTIVE_REQUIRED(
+            HttpStatus.BAD_REQUEST,
+            "DELIVERY_METHOD_AT_LEAST_ONE_ACTIVE_REQUIRED",
+            "활성화된 배송 방법이 최소 1개 이상 필요합니다."
     ),
 
     // Order
