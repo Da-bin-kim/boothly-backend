@@ -49,35 +49,21 @@ public class SalePostService {
      * 판매글을 생성한다.
      *
      * @param sellerId 판매자 ID
-     * @param request 판매글 생성 요청 DTO
+     * @param createRequest 판매글 생성 요청 DTO
      * @return 생성된 판매글 ID
      */
     @Transactional
-    public SalePostCreateResponse createSalePost(Long sellerId, SalePostCreateRequest request) {
+    public SalePostCreateResponse createSalePost(Long sellerId, SalePostCreateRequest createRequest) {
         /* 유효성 검증 */
         User seller = userRepository.findById(sellerId).orElseThrow(() ->
                 new UserNotFoundException(sellerId));
-        validateSalePeriod(request);
 
-        /* DTO -> Entity */
-        SalePost salePost = SalePost.builder()
-                .user(seller)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .saleStatus(request.getSaleStatus())
-                .startAt(request.getStartAt())
-                .endAt(request.getEndAt())
-                .fulfillmentDate(request.getFulfillmentDate())
-                .thumbnailImageUrl(request.getThumbnailImageUrl())
-                .bankName(request.getBankName())
-                .accountNumber(request.getAccountNumber())
-                .accountHolder(request.getAccountHolder())
-                .build();
+        SalePost salePost = SalePost.create(seller, createRequest.toCreateValues());
 
         /* DB 저장 */
         SalePost savedSalePost = salePostRepository.save(salePost);
-        saveProductOptions(savedSalePost, request.getProductOptions());
-        saveDeliveryMethods(savedSalePost, request.getDeliveryMethods());
+        saveProductOptions(savedSalePost, createRequest.getProductOptions());
+        saveDeliveryMethods(savedSalePost, createRequest.getDeliveryMethods());
 
         return new SalePostCreateResponse(savedSalePost.getId());
     }
@@ -174,8 +160,8 @@ public class SalePostService {
 
         SalePost salePost = salePostRepository.findForUpdateByIdAndUserId(salePostId, sellerId)
                 .orElseThrow(()->new SalePostNotFoundException(salePostId));
+        salePost.update(updateRequest.toUpdateValues());
 
-        //TODO 게시글 내용 수정
 
         boolean hasExistingOrders = orderRepository.existsBySalePost_Id(salePostId);
 
@@ -204,14 +190,7 @@ public class SalePostService {
         validateAtLeastOneActiveDeliveryMethod(salePostId);
     }
 
-    private void validateSalePeriod(SalePostCreateRequest request) {
-        if (request.getEndAt() != null
-                && request.getEndAt().isBefore(request.getStartAt())) {
-            throw new IllegalArgumentException(
-                    "판매 종료 시각은 판매 시작 시각보다 빠를 수 없습니다."
-            );
-        }
-    }
+
 
     private void validateNoOngoingOrders(Long salePostId){
         boolean hasOngoingOrders = orderRepository.existsBySalePost_IdAndOrderStatusIn(salePostId, ONGOING_ORDER_STATUSES);

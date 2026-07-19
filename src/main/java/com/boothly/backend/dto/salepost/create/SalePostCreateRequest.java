@@ -1,6 +1,7 @@
 package com.boothly.backend.dto.salepost.create;
 
 import com.boothly.backend.domain.enums.SalePostStatus;
+import com.boothly.backend.domain.salepost.SalePostCreateValues;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -53,4 +54,19 @@ public class SalePostCreateRequest {
     @Valid
     @NotEmpty
     private List<DeliveryMethodCreateRequest> deliveryMethods;
+
+    public SalePostCreateValues toCreateValues() {
+        return new SalePostCreateValues(
+                title,
+                content,
+                saleStatus,
+                startAt,
+                endAt,
+                fulfillmentDate,
+                thumbnailImageUrl,
+                bankName,
+                accountNumber,
+                accountHolder
+        );
+    }
 }

@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "sale_posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class SalePost extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +52,29 @@ public class SalePost extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String accountHolder;
 
+
+    public static SalePost create(
+            User seller,
+            SalePostCreateValues createValues
+    ) {
+        validateSalePeriod(createValues.startAt(), createValues.endAt());
+        return new SalePost(seller, createValues);
+    }
+
+    public void update(SalePostUpdateValues updateValues) {
+        validateSalePeriod(updateValues.startAt(), updateValues.endAt());
+
+        title = updateValues.title();
+        content = updateValues.content();
+        startAt = updateValues.startAt();
+        endAt = updateValues.endAt();
+        fulfillmentDate = updateValues.fulfillmentDate();
+        thumbnailImageUrl = updateValues.thumbnailImageUrl();
+        bankName = updateValues.bankName();
+        accountNumber = updateValues.accountNumber();
+        accountHolder = updateValues.accountHolder();
+    }
+
     public void changeStatus(SalePostStatus targetStatus) {
         switch (targetStatus) {
             case CLOSED -> close();
@@ -64,6 +85,24 @@ public class SalePost extends BaseTimeEntity {
             );
         }
     }
+
+    private SalePost(
+            User seller,
+            SalePostCreateValues createValues
+    ) {
+        this.user = seller;
+        this.title = createValues.title();
+        this.content = createValues.content();
+        this.saleStatus = createValues.saleStatus();
+        this.startAt = createValues.startAt();
+        this.endAt = createValues.endAt();
+        this.fulfillmentDate = createValues.fulfillmentDate();
+        this.thumbnailImageUrl = createValues.thumbnailImageUrl();
+        this.bankName = createValues.bankName();
+        this.accountNumber = createValues.accountNumber();
+        this.accountHolder = createValues.accountHolder();
+    }
+
     private void close() {
         if (saleStatus != SalePostStatus.OPEN) {
             throw new InvalidSaleStatusTransitionException(
@@ -71,9 +110,11 @@ public class SalePost extends BaseTimeEntity {
                     SalePostStatus.CLOSED
             );
         }
+        LocalDateTime closedAt = LocalDateTime.now();
+        validateSalePeriod(startAt, closedAt);
 
         saleStatus = SalePostStatus.CLOSED;
-        endAt = LocalDateTime.now();
+        endAt = closedAt;
     }
 
     private void hide(){
@@ -85,5 +126,17 @@ public class SalePost extends BaseTimeEntity {
         }
 
         saleStatus = SalePostStatus.HIDDEN;
+    }
+
+    private static void validateSalePeriod(
+            LocalDateTime startAt,
+            LocalDateTime endAt)
+    {
+        if (endAt != null
+                && endAt.isBefore(startAt)) {
+            throw new IllegalArgumentException(
+                    "판매 종료 시각은 판매 시작 시각보다 빠를 수 없습니다."
+            );
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.boothly.backend.dto.salepost.update;
 
+import com.boothly.backend.domain.salepost.SalePostUpdateValues;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -49,4 +50,18 @@ public class SalePostUpdateRequest {
     @Valid
     @NotEmpty
     private List<@NotNull ProductOptionUpdateRequest> productOptions;
+
+    public SalePostUpdateValues toUpdateValues(){
+        return new SalePostUpdateValues(
+                title,
+                content,
+                startAt,
+                endAt,
+                fulfillmentDate,
+                thumbnailImageUrl,
+                bankName,
+                accountNumber,
+                accountHolder
+        );
+    }
 }
