@@ -1,12 +1,12 @@
 package com.boothly.backend.dto.salepost.update;
 
 import com.boothly.backend.domain.salepost.ProductOptionUpdateValues;
+import com.boothly.backend.dto.salepost.create.ProductOptionCreateRequest;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 
 @Getter
 public class ProductOptionUpdateRequest {
-    @NotNull
     private Long id;
 
     @NotNull
@@ -43,6 +43,16 @@ public class ProductOptionUpdateRequest {
     @NotNull
     private Boolean isDeleted;
 
+    @AssertTrue(message = "신규 상품 옵션은 활성화 상태이고 삭제되지 않은 상태여야 합니다.")
+    public boolean isValidCreateState() {
+        if (!isCreateRequest()) {
+            return true;
+        }
+
+        return Boolean.TRUE.equals(isActive)
+                && Boolean.FALSE.equals(isDeleted);
+    }
+
     public ProductOptionUpdateValues toUpdateValues() {
         return new ProductOptionUpdateValues(
                 displayOrder,
@@ -56,5 +66,22 @@ public class ProductOptionUpdateRequest {
                 isActive,
                 isDeleted
         );
+    }
+
+    public ProductOptionCreateRequest toCreateRequest() {
+        return ProductOptionCreateRequest.builder()
+                .displayOrder(displayOrder)
+                .name(name)
+                .description(description)
+                .imageUrl(imageUrl)
+                .price(price)
+                .cost(cost)
+                .stockQuantity(stockQuantity)
+                .maxQuantityPerOrder(maxQuantityPerOrder)
+                .build();
+    }
+
+    public boolean isCreateRequest() {
+        return id == null;
     }
 }

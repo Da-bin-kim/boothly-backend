@@ -1,12 +1,13 @@
 package com.boothly.backend.dto.salepost.create;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
+@Builder
 public class ProductOptionCreateRequest {
     @PositiveOrZero
     private int displayOrder;

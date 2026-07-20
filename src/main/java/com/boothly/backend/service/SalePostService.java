@@ -165,16 +165,12 @@ public class SalePostService {
 
         boolean hasExistingOrders = orderRepository.existsBySalePost_Id(salePostId);
 
-        //TODO 새로운 옵션 추가 동작
         List<ProductOptionUpdateRequest> productOptionRequests =
                 updateRequest.getProductOptions();
 
-        List<Long> productOptionIds = productOptionRequests.stream()
-                .map(ProductOptionUpdateRequest::getId)
-                .toList();
+        addNewProductOptions(salePost, productOptionRequests);
+        updateExistingProductOptions(salePostId, productOptionRequests, hasExistingOrders);
 
-        validateNoDuplicateProductOptionIds(productOptionIds);
-        updateProductOptions(salePostId, productOptionRequests, productOptionIds, hasExistingOrders);
         validateAtLeastOneActiveProductOption(salePostId);
 
         //TODO 새로운거 추가 동작
@@ -284,15 +280,36 @@ public class SalePostService {
         deliveryMethodRepository.saveAll(deliveryMethods);
     }
 
-    private void updateProductOptions(
+    private void addNewProductOptions(
+            SalePost salePost,
+            List<ProductOptionUpdateRequest> requestedProductOptions
+    ) {
+        List<ProductOptionCreateRequest> productOptionCreateRequests = requestedProductOptions.stream()
+                .filter(ProductOptionUpdateRequest::isCreateRequest)
+                .map(ProductOptionUpdateRequest::toCreateRequest)
+                .toList();
+        saveProductOptions(salePost, productOptionCreateRequests);
+    }
+
+    private void updateExistingProductOptions(
             Long salePostId,
-            List<ProductOptionUpdateRequest> updateRequests,
-            List<Long> productOptionIds,
+            List<ProductOptionUpdateRequest> requestedProductOptions,
             boolean hasExistingOrders
     ) {
-        Map<Long, ProductOption> productOptions = getProductOptionsByIds(salePostId, productOptionIds);
+        List<ProductOptionUpdateRequest> existingProductOptionRequests =
+                requestedProductOptions.stream()
+                        .filter(request -> !request.isCreateRequest())
+                        .toList();
 
-        updateRequests.forEach(request -> {
+        List<Long> existingProductOptionIds = existingProductOptionRequests.stream()
+                .map(ProductOptionUpdateRequest::getId)
+                .toList();
+
+        validateNoDuplicateProductOptionIds(existingProductOptionIds);
+
+        Map<Long, ProductOption> productOptions = getProductOptionsByIds(salePostId, existingProductOptionIds);
+
+        existingProductOptionRequests.forEach(request -> {
             ProductOption productOption = productOptions.get(request.getId());
             productOption.update(request.toUpdateValues(), hasExistingOrders);
         });
