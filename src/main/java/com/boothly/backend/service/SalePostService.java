@@ -173,16 +173,12 @@ public class SalePostService {
 
         validateAtLeastOneActiveProductOption(salePostId);
 
-        //TODO 새로운거 추가 동작
         List<DeliveryMethodUpdateRequest> deliveryMethodUpdateRequests =
                 updateRequest.getDeliveryMethods();
 
-        List<Long> deliveryMethodIds = deliveryMethodUpdateRequests.stream()
-                .map(DeliveryMethodUpdateRequest::getId)
-                .toList();
+        addNewDeliveryMethod(salePost, deliveryMethodUpdateRequests);
+        updateExistingDeliveryMethods(salePostId, deliveryMethodUpdateRequests, hasExistingOrders);
 
-        validateNoDuplicateDeliveryMethodIds(deliveryMethodIds);
-        updateDeliveryMethods(salePostId, deliveryMethodUpdateRequests, deliveryMethodIds, hasExistingOrders);
         validateAtLeastOneActiveDeliveryMethod(salePostId);
     }
 
@@ -291,6 +287,19 @@ public class SalePostService {
         saveProductOptions(salePost, productOptionCreateRequests);
     }
 
+    private void addNewDeliveryMethod(
+            SalePost salePost,
+            List<DeliveryMethodUpdateRequest> requestedDeliveryMethods
+    ) {
+        List<DeliveryMethodCreateRequest> deliveryMethodCreateRequests =
+                requestedDeliveryMethods.stream()
+                        .filter(DeliveryMethodUpdateRequest::isCreateRequest)
+                        .map(DeliveryMethodUpdateRequest::toCreateRequest)
+                        .toList();
+
+        saveDeliveryMethods(salePost, deliveryMethodCreateRequests);
+    }
+
     private void updateExistingProductOptions(
             Long salePostId,
             List<ProductOptionUpdateRequest> requestedProductOptions,
@@ -315,15 +324,25 @@ public class SalePostService {
         });
     }
 
-    private void updateDeliveryMethods(
+    private void updateExistingDeliveryMethods(
             Long salePostId,
-            List<DeliveryMethodUpdateRequest> updateRequests,
-            List<Long> deliveryMethodIds,
+            List<DeliveryMethodUpdateRequest> requestedDeliveryMethods,
             boolean hasExistingOrders
     ) {
-        Map<Long, DeliveryMethod> deliveryMethods = getDeliveryMethodsByIds(salePostId, deliveryMethodIds);
+        List<DeliveryMethodUpdateRequest> existingDeliveryMethodRequests =
+                requestedDeliveryMethods.stream()
+                        .filter(request -> !request.isCreateRequest())
+                        .toList();
 
-        updateRequests.forEach(request -> {
+        List<Long> existingDeliveryMethodIds = existingDeliveryMethodRequests.stream()
+                .map(DeliveryMethodUpdateRequest::getId)
+                .toList();
+
+        validateNoDuplicateDeliveryMethodIds(existingDeliveryMethodIds);
+
+        Map<Long, DeliveryMethod> deliveryMethods = getDeliveryMethodsByIds(salePostId, existingDeliveryMethodIds);
+
+        existingDeliveryMethodRequests.forEach(request -> {
             DeliveryMethod deliveryMethod = deliveryMethods.get(request.getId());
             deliveryMethod.update(request.toUpdateValues(), hasExistingOrders);
         });

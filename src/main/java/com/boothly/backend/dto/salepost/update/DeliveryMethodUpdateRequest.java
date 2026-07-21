@@ -2,15 +2,12 @@ package com.boothly.backend.dto.salepost.update;
 
 import com.boothly.backend.domain.enums.DeliveryType;
 import com.boothly.backend.domain.salepost.DeliveryMethodUpdateValues;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import com.boothly.backend.dto.salepost.create.DeliveryMethodCreateRequest;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 
 @Getter
 public class DeliveryMethodUpdateRequest {
-    @NotNull
     private Long id;
 
     @NotBlank
@@ -30,6 +27,16 @@ public class DeliveryMethodUpdateRequest {
     @NotNull
     private Boolean isDeleted;
 
+    @AssertTrue(message = "신규 배송 방법은 활성화 상태이고 삭제되지 않은 상태여야 합니다.")
+    public boolean isValidCreateState() {
+        if (!isCreateRequest()) {
+            return true;
+        }
+
+        return Boolean.TRUE.equals(isActive)
+                && Boolean.FALSE.equals(isDeleted);
+    }
+
     public DeliveryMethodUpdateValues toUpdateValues() {
         return new DeliveryMethodUpdateValues(
                 methodName,
@@ -38,5 +45,17 @@ public class DeliveryMethodUpdateRequest {
                 isActive,
                 isDeleted
         );
+    }
+
+    public DeliveryMethodCreateRequest toCreateRequest() {
+        return DeliveryMethodCreateRequest.builder()
+                .methodName(methodName)
+                .deliveryType(deliveryType)
+                .deliveryFee(deliveryFee)
+                .build();
+    }
+
+    public boolean isCreateRequest() {
+        return id == null;
     }
 }
