@@ -15,10 +15,7 @@ import com.boothly.backend.dto.salepost.create.SalePostCreateResponse;
 import com.boothly.backend.dto.salepost.detail.SalePostDetailResponse;
 import com.boothly.backend.dto.salepost.list.MySalePostOverviewResponse;
 import com.boothly.backend.dto.salepost.list.SalePostListResponse;
-import com.boothly.backend.dto.salepost.update.DeliveryMethodUpdateRequest;
-import com.boothly.backend.dto.salepost.update.ProductOptionUpdateRequest;
-import com.boothly.backend.dto.salepost.update.SalePostUpdateFormResponse;
-import com.boothly.backend.dto.salepost.update.SalePostUpdateRequest;
+import com.boothly.backend.dto.salepost.update.*;
 import com.boothly.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -151,9 +148,8 @@ public class SalePostService {
         return SalePostStatusChangeResponse.from(salePost);
     }
 
-    //TODO 호출 컨트롤러
     @Transactional
-    public void updateSalePostDetail(
+    public SalePostUpdateResponse updateSalePostDetail(
             Long sellerId,
             Long salePostId,
             SalePostUpdateRequest updateRequest){
@@ -180,6 +176,8 @@ public class SalePostService {
         updateExistingDeliveryMethods(salePostId, deliveryMethodUpdateRequests, hasExistingOrders);
 
         validateAtLeastOneActiveDeliveryMethod(salePostId);
+
+        return new SalePostUpdateResponse(salePostId);
     }
 
 
