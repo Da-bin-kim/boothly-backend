@@ -2,7 +2,10 @@ package com.boothly.backend.domain.salepost;
 
 import com.boothly.backend.common.entity.BaseTimeEntity;
 import com.boothly.backend.common.exception.ErrorCode;
+import com.boothly.backend.common.exception.salepost.InsufficientProductOptionStockException;
+import com.boothly.backend.common.exception.salepost.InvalidSalePostOptionException;
 import com.boothly.backend.common.exception.salepost.ProductOptionException;
+import com.boothly.backend.common.exception.salepost.ProductOptionQuantityLimitExceededException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -123,6 +126,14 @@ public class ProductOption extends BaseTimeEntity {
         changeActiveStatus(true);
     }
 
+    public void decreaseStock(int orderQuantity) {
+        validateOrderQuantity(orderQuantity);
+        validateAvailableForSale();
+        validateSufficientStock(orderQuantity);
+
+        stockQuantity -= orderQuantity;
+    }
+
     private boolean isActiveChanged(ProductOptionUpdateValues updateValues) {
         return active != updateValues.isActive();
     }
@@ -198,5 +209,42 @@ public class ProductOption extends BaseTimeEntity {
 
     private void updateStockQuantity(int stockQuantity) {
         this.stockQuantity = stockQuantity;
+    }
+
+    // 재고 관련 검증 함수
+    private void validateAvailableForSale() {
+        if (!active || deletedAt != null) {
+            throw new InvalidSalePostOptionException(
+                    salePost.getId(),
+                    id
+            );
+        }
+    }
+
+    private void validateSufficientStock(int orderQuantity) {
+        if (stockQuantity < orderQuantity) {
+            throw new InsufficientProductOptionStockException(
+                    id,
+                    orderQuantity,
+                    stockQuantity
+            );
+        }
+    }
+
+    private void validateOrderQuantity(int orderQuantity) {
+        if (orderQuantity <= 0) {
+            throw new IllegalArgumentException(
+                    "주문 수량은 1개 이상이어야 합니다."
+            );
+        }
+
+        if (maxQuantityPerOrder != null
+                && orderQuantity > maxQuantityPerOrder) {
+            throw new ProductOptionQuantityLimitExceededException(
+                    id,
+                    orderQuantity,
+                    maxQuantityPerOrder
+            );
+        }
     }
 }

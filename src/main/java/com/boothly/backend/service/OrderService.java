@@ -162,11 +162,14 @@ public class OrderService {
 
 
     private SalePost validateAndGetSalePost(Long salePostId) {
-        SalePost salePost = salePostRepository.findById(salePostId).orElseThrow(() ->
-                new SalePostNotFoundException(salePostId));
+        SalePost salePost = salePostRepository
+                .findForCreateOrderById(salePostId)
+                .orElseThrow(() -> new SalePostNotFoundException(salePostId));
+
         if (salePost.getSaleStatus() != SalePostStatus.OPEN) {
             throw new SalePostNotOpenException(salePostId);
         }
+
         return salePost;
     }
 
@@ -188,27 +191,8 @@ public class OrderService {
             throw new InvalidSalePostOptionException(salePostId, null);
         }
 
-        // 3. 판매 상태 및 재고 상태, 최대 주문 갯수 검증
-        Map<Long, ProductOption> matchedOptionMap = matchedProductOptions.stream()
+        return matchedProductOptions.stream()
                 .collect(Collectors.toMap(ProductOption::getId, productOption -> productOption));
-
-        for (OrderItemCreateRequest requestedItem : orderItems) {
-            ProductOption matchedOption = matchedOptionMap.get(requestedItem.getProductOptionId());
-
-            if (!matchedOption.isActive()) {
-                throw new InvalidSalePostOptionException(salePostId, matchedOption.getId());
-            }
-            if (matchedOption.getMaxQuantityPerOrder() != null
-                    && (requestedItem.getQuantity() > matchedOption.getMaxQuantityPerOrder())) {
-                throw  new ProductOptionQuantityLimitExceededException(
-                        matchedOption.getId(),
-                        requestedItem.getQuantity(),
-                        matchedOption.getMaxQuantityPerOrder()
-                );
-            }
-        }
-
-        return matchedOptionMap;
     }
 
     private DeliveryMethod validateAndGetDeliveryMethod(Long salePostId, Long deliveryMethodId) {
@@ -255,20 +239,32 @@ public class OrderService {
 
     private List<OrderItem> saveOrderItems(
             Order order,
-            Map<Long, ProductOption> productOptions,
-            List<OrderItemCreateRequest> orderItemCreateRequests) {
+            Map<Long, ProductOption> productOptionById,
+            List<OrderItemCreateRequest> requests) {
 
-        List<OrderItem> orderItems = new ArrayList<>();
+        decreaseStock(productOptionById, requests);
+        List<OrderItem> newOrderItems = createOrderItems(order, productOptionById, requests);
+        return orderItemRepository.saveAll(newOrderItems);
+    }
 
-        for(OrderItemCreateRequest request : orderItemCreateRequests) {
-            ProductOption productOption = productOptions.get(request.getProductOptionId());
+    private void decreaseStock(
+            Map<Long, ProductOption> productOptionById,
+            List<OrderItemCreateRequest> requests
+    ) {
+        for(OrderItemCreateRequest request : requests) {
+            ProductOption productOption = productOptionById.get(request.getProductOptionId());
+            productOption.decreaseStock(request.getQuantity());
+        }
+    }
 
-            decreaseStock(
-                    order.getSalePost().getId(),
-                    productOption.getId(),
-                    request.getQuantity()
-            );
-
+    private List<OrderItem> createOrderItems(
+            Order order,
+            Map<Long, ProductOption> productOptionById,
+            List<OrderItemCreateRequest> requests
+    ) {
+        List<OrderItem> newOrderItems = new ArrayList<>();
+        for(OrderItemCreateRequest request : requests) {
+            ProductOption productOption = productOptionById.get(request.getProductOptionId());
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .productOption(productOption)
@@ -277,21 +273,10 @@ public class OrderService {
                     .unitCost(productOption.getCost())
                     .quantity(request.getQuantity())
                     .build();
-            orderItems.add(orderItem);
+            newOrderItems.add(orderItem);
         }
 
-        return orderItemRepository.saveAll(orderItems);
-    }
-
-    private void decreaseStock(Long salePostId, Long productOptionId, Integer quantity) {
-        int updated = productOptionRepository.decreaseStock(salePostId, productOptionId, quantity);
-        if(updated == 0){
-            throw new InsufficientProductOptionStockException(
-                    productOptionId,
-                    quantity,
-                    0
-            );
-        }
+        return newOrderItems;
     }
 
     private void restoreStock(Long salePostId, Long orderId){
