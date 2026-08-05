@@ -280,7 +280,10 @@ public class OrderService {
     }
 
     private void restoreStock(Long salePostId, Long orderId){
-        List<OrderItem> orderItems = orderItemRepository.findByOrder_id(orderId);
+        SalePost salePost = salePostRepository.findForUpdateById(salePostId)
+                .orElseThrow(()->new SalePostNotFoundException(salePostId));
+
+        List<OrderItem> orderItems = validateAndGetOrderItems(orderId);
 
         for(OrderItem orderItem : orderItems){
             int restoreQuantity = orderItem.getQuantity();

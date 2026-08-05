@@ -31,6 +31,15 @@ public interface SalePostRepository extends JpaRepository<SalePost, Long> {
                     value = "3000"
             )
     )
+    Optional<SalePost> findForUpdateById(Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(
+            @QueryHint(
+                    name = "jakarta.persistence.lock.timeout",
+                    value = "3000"
+            )
+    )
     Optional<SalePost> findForUpdateByIdAndUserId(Long id, Long sellerId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
