@@ -50,16 +50,19 @@ public class OrderService {
     public OrderCreateResponse createOrder(Long buyerId, Long salePostId, OrderCreateRequest request) {
         User buyer = userRepository.findById(buyerId).orElseThrow(() ->
                 new UserNotFoundException(buyerId));
+        SalePost salePost = getOpenSalePostForOrderCreation(salePostId);
+        Map<Long, ProductOption> productOptionsById = getProductOptionsByIdForOrderCreation(salePostId, request.getOrderItems());
+        DeliveryMethod deliveryMethod = getActiveDeliveryMethodForOrderCreation(salePostId, request.getDeliveryMethodId());
+        int itemsTotalPrice = calculateItemsTotalPrice(productOptionsById, request.getOrderItems());
 
-        SalePost salePost = validateAndGetSalePost(salePostId);
-        Map<Long, ProductOption> productOptions = validateAndGetProductOptions(salePostId, request.getOrderItems());
-        DeliveryMethod deliveryMethod = validateAndGetDeliveryMethod(salePostId, request.getDeliveryMethodId());
-        int itemsTotalPrice = getItemsTotalPrice(productOptions, request.getOrderItems());
+        Order order = createNewOrder(buyer, salePost, deliveryMethod, request, itemsTotalPrice);
+        Order savedOrder = orderRepository.save(order);
 
-        Order order = saveOrder(buyer, salePost, deliveryMethod, request, itemsTotalPrice);
-        List<OrderItem> orderItems = saveOrderItems(order, productOptions, request.getOrderItems());
+        decreaseProductOptionStocks(productOptionsById, request.getOrderItems());
+        List<OrderItem> orderItems = createOrderItems(savedOrder, productOptionsById, request.getOrderItems());
+        List<OrderItem> savedOrderItems = orderItemRepository.saveAll(orderItems);
 
-        return OrderCreateResponse.from(order, orderItems);
+        return OrderCreateResponse.from(savedOrder, savedOrderItems);
     }
 
     public Page<OrderListResponse> findBuyerOrders(
@@ -161,7 +164,7 @@ public class OrderService {
     }
 
 
-    private SalePost validateAndGetSalePost(Long salePostId) {
+    private SalePost getOpenSalePostForOrderCreation(Long salePostId) {
         SalePost salePost = salePostRepository
                 .findForCreateOrderById(salePostId)
                 .orElseThrow(() -> new SalePostNotFoundException(salePostId));
@@ -174,7 +177,7 @@ public class OrderService {
     }
 
 
-    private Map<Long, ProductOption> validateAndGetProductOptions (Long salePostId, List<OrderItemCreateRequest> orderItems) {
+    private Map<Long, ProductOption> getProductOptionsByIdForOrderCreation(Long salePostId, List<OrderItemCreateRequest> orderItems) {
         // 1. 중복된 상품 옵션이 있는지 검증
         Set<Long> uniqueOptionIds = orderItems.stream()
                 .map(OrderItemCreateRequest::getProductOptionId)
@@ -195,17 +198,19 @@ public class OrderService {
                 .collect(Collectors.toMap(ProductOption::getId, productOption -> productOption));
     }
 
-    private DeliveryMethod validateAndGetDeliveryMethod(Long salePostId, Long deliveryMethodId) {
+    private DeliveryMethod getActiveDeliveryMethodForOrderCreation(Long salePostId, Long deliveryMethodId) {
         DeliveryMethod deliveryMethod = deliveryMethodRepository
                 .findBySalePost_IdAndDeletedAtIsNullAndId(salePostId, deliveryMethodId)
                 .orElseThrow(()->new DeliveryMethodNotFoundException(salePostId, deliveryMethodId));
+
         if(!deliveryMethod.isActive()){
             throw new InactiveDeliveryMethodException(salePostId, deliveryMethodId);
         }
+
         return deliveryMethod;
     }
 
-    private int getItemsTotalPrice(Map<Long, ProductOption> productOptions, List<OrderItemCreateRequest> orderItems) {
+    private int calculateItemsTotalPrice(Map<Long, ProductOption> productOptions, List<OrderItemCreateRequest> orderItems) {
         int itemsTotalPrice = 0;
         for(OrderItemCreateRequest request : orderItems) {
             ProductOption productOption = productOptions.get(request.getProductOptionId());
@@ -214,8 +219,14 @@ public class OrderService {
         return itemsTotalPrice;
     }
 
-    private Order saveOrder(User buyer, SalePost salePost, DeliveryMethod deliveryMethod, OrderCreateRequest request, int itemsTotalPrice) {
-        Order order = Order.builder()
+    private Order createNewOrder(
+            User buyer,
+            SalePost salePost,
+            DeliveryMethod deliveryMethod,
+            OrderCreateRequest request,
+            int itemsTotalPrice
+    ) {
+        return Order.builder()
                 .buyer(buyer)
                 .salePost(salePost)
                 .payerName(request.getPayerName())
@@ -233,50 +244,32 @@ public class OrderService {
                 .accountNumber(request.getAccountNumber())
                 .accountHolder(request.getAccountHolder())
                 .build();
-
-        return orderRepository.save(order);
-    }
-
-    private List<OrderItem> saveOrderItems(
-            Order order,
-            Map<Long, ProductOption> productOptionById,
-            List<OrderItemCreateRequest> requests) {
-
-        decreaseStock(productOptionById, requests);
-        List<OrderItem> newOrderItems = createOrderItems(order, productOptionById, requests);
-        return orderItemRepository.saveAll(newOrderItems);
-    }
-
-    private void decreaseStock(
-            Map<Long, ProductOption> productOptionById,
-            List<OrderItemCreateRequest> requests
-    ) {
-        for(OrderItemCreateRequest request : requests) {
-            ProductOption productOption = productOptionById.get(request.getProductOptionId());
-            productOption.decreaseStock(request.getQuantity());
-        }
     }
 
     private List<OrderItem> createOrderItems(
             Order order,
-            Map<Long, ProductOption> productOptionById,
+            Map<Long, ProductOption> productOptionsById,
             List<OrderItemCreateRequest> requests
     ) {
         List<OrderItem> newOrderItems = new ArrayList<>();
+
         for(OrderItemCreateRequest request : requests) {
-            ProductOption productOption = productOptionById.get(request.getProductOptionId());
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .productOption(productOption)
-                    .productOptionName(productOption.getName())
-                    .unitPrice(productOption.getPrice())
-                    .unitCost(productOption.getCost())
-                    .quantity(request.getQuantity())
-                    .build();
-            newOrderItems.add(orderItem);
+            ProductOption productOption = productOptionsById.get(request.getProductOptionId());
+
+            newOrderItems.add(OrderItem.create(order, productOption, request.getQuantity()));
         }
 
         return newOrderItems;
+    }
+
+    private void decreaseProductOptionStocks(
+            Map<Long, ProductOption> productOptionsById,
+            List<OrderItemCreateRequest> requests
+    ) {
+        for(OrderItemCreateRequest request : requests) {
+            ProductOption productOption = productOptionsById.get(request.getProductOptionId());
+            productOption.decreaseStock(request.getQuantity());
+        }
     }
 
     private void restoreStock(Long salePostId, Long orderId){

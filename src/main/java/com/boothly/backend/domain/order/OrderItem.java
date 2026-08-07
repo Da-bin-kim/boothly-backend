@@ -43,4 +43,19 @@ public class OrderItem extends BaseTimeEntity {
 
     @Column(nullable = false)
     private int quantity;
+
+    public static OrderItem create(
+            Order order,
+            ProductOption productOption,
+            int quantity
+    ){
+        return OrderItem.builder()
+                .order(order)
+                .productOption(productOption)
+                .productOptionName(productOption.getName())
+                .unitPrice(productOption.getPrice())
+                .unitCost(productOption.getCost())
+                .quantity(quantity)
+                .build();
+    }
 }
