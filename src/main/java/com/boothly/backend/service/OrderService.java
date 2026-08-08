@@ -123,8 +123,12 @@ public class OrderService {
             );
         }
 
-        int update = orderRepository.changeOrderStatusBySeller(sellerId, salePostId, orderId, expectedCurrentStatus, targetOrderStatus);
-        if(update == 0){
+        if( targetOrderStatus == OrderStatus.CANCELED ){
+            lockSalePost(salePostId);
+        }
+
+        int updated = orderRepository.changeOrderStatusBySeller(sellerId, salePostId, orderId, expectedCurrentStatus, targetOrderStatus);
+        if(updated == 0){
             throw new InvalidOrderStatusTransitionException(
                     orderRepository.findBySalePost_User_IdAndSalePost_idAndId(sellerId, salePostId, orderId)
                             .orElseThrow(()->new OrderNotFoundException(sellerId, salePostId, orderId))
@@ -150,19 +154,33 @@ public class OrderService {
         Order order = orderRepository.findByBuyer_idAndId(buyerId, orderId)
                 .orElseThrow(()->new OrderNotFoundException(buyerId, orderId));
 
-        int update = orderRepository.cancelRequestedOrderByBuyer(buyerId, orderId);
-        if(update == 0){
+        Long salePostId = order.getSalePost().getId();
+        lockSalePost(salePostId);
+
+        int updated = orderRepository.cancelRequestedOrderByBuyer(buyerId, orderId);
+
+        if(updated == 0){
+            Order currentOrder = orderRepository.findByBuyer_idAndId(buyerId, orderId)
+                    .orElseThrow(() -> new OrderNotFoundException(buyerId, orderId));
+
             throw new InvalidOrderStatusTransitionException(
-                    order.getOrderStatus(),
+                    currentOrder.getOrderStatus(),
                     OrderStatus.CANCELED
             );
         }
-        restoreStock(order.getSalePost().getId(), orderId);
+
+        restoreStock(salePostId, orderId);
+
         return OrderStatusChangeResponse.from(
                 orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(buyerId, orderId))
         );
     }
 
+
+    private void lockSalePost(Long salePostId) {
+        salePostRepository.findForUpdateById(salePostId)
+                .orElseThrow(() -> new SalePostNotFoundException(salePostId));
+    }
 
     private SalePost getOpenSalePostForOrderCreation(Long salePostId) {
         SalePost salePost = salePostRepository
@@ -273,9 +291,6 @@ public class OrderService {
     }
 
     private void restoreStock(Long salePostId, Long orderId){
-        SalePost salePost = salePostRepository.findForUpdateById(salePostId)
-                .orElseThrow(()->new SalePostNotFoundException(salePostId));
-
         List<OrderItem> orderItems = validateAndGetOrderItems(orderId);
 
         for(OrderItem orderItem : orderItems){
