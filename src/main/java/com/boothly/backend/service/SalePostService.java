@@ -136,7 +136,7 @@ public class SalePostService {
             Long sellerId,
             Long salePostId,
             SalePostStatus salePostStatus) {
-        SalePost salePost = salePostRepository.findByIdAndUser_Id(salePostId, sellerId)
+        SalePost salePost = salePostRepository.findForUpdateByIdAndUserId(salePostId, sellerId)
                 .orElseThrow(() -> new SalePostNotFoundException(salePostId));
 
         if(salePost.getSaleStatus() == SalePostStatus.CLOSED
