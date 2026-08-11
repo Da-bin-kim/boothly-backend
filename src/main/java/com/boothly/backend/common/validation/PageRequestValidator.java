@@ -1,6 +1,9 @@
 package com.boothly.backend.common.validation;
 
 public final class PageRequestValidator {
+    private PageRequestValidator() {
+    }
+
     public static void validate(int page, int size) {
         if (page < 0) {
             throw new IllegalArgumentException("page는 0 이상이어야 합니다.");
