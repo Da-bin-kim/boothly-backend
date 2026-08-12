@@ -151,7 +151,7 @@ public class OrderService {
             Long buyerId,
             Long orderId
     ){
-        Order order = orderRepository.findByBuyer_idAndId(buyerId, orderId)
+        Order order = orderRepository.findByBuyer_IdAndId(buyerId, orderId)
                 .orElseThrow(()->new OrderNotFoundException(buyerId, orderId));
 
         Long salePostId = order.getSalePost().getId();
@@ -160,7 +160,7 @@ public class OrderService {
         int updated = orderRepository.cancelRequestedOrderByBuyer(buyerId, orderId);
 
         if(updated == 0){
-            Order currentOrder = orderRepository.findByBuyer_idAndId(buyerId, orderId)
+            Order currentOrder = orderRepository.findByBuyer_IdAndId(buyerId, orderId)
                     .orElseThrow(() -> new OrderNotFoundException(buyerId, orderId));
 
             throw new InvalidOrderStatusTransitionException(
