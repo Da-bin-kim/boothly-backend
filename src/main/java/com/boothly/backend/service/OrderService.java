@@ -334,7 +334,7 @@ public class OrderService {
     }
 
     private List<OrderItem> validateAndGetOrderItems(Long orderId) {
-        List<OrderItem> orderItems = orderItemRepository.findByOrder_id(orderId);
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_Id(orderId);
 
         if (orderItems.isEmpty()) {
             throw new OrderItemMissingForOrderException(orderId);
@@ -353,7 +353,7 @@ public class OrderService {
                 .toList();
 
         List<OrderItem> orderItems =
-                orderItemRepository.findByOrder_idIn(orderIds);
+                orderItemRepository.findByOrder_IdIn(orderIds);
 
         Map<Long, List<OrderItem>> matchedOrderItemMap =
                 orderItems.stream()
