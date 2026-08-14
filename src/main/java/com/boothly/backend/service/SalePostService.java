@@ -172,7 +172,7 @@ public class SalePostService {
         List<DeliveryMethodUpdateRequest> deliveryMethodUpdateRequests =
                 updateRequest.getDeliveryMethods();
 
-        addNewDeliveryMethod(salePost, deliveryMethodUpdateRequests);
+        addNewDeliveryMethods(salePost, deliveryMethodUpdateRequests);
         updateExistingDeliveryMethods(salePostId, deliveryMethodUpdateRequests, hasExistingOrders);
 
         validateAtLeastOneActiveDeliveryMethod(salePostId);
@@ -285,7 +285,7 @@ public class SalePostService {
         saveProductOptions(salePost, productOptionCreateRequests);
     }
 
-    private void addNewDeliveryMethod(
+    private void addNewDeliveryMethods(
             SalePost salePost,
             List<DeliveryMethodUpdateRequest> requestedDeliveryMethods
     ) {
